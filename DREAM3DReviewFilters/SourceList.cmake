@@ -78,6 +78,7 @@ set(_PublicFilters
   FindCSLBoundaries
   InsertTransformationPhases
   TiDwellFatigueCrystallographicAnalysis
+  ITKPairwiseImageRegistration
 )
 
 list(LENGTH _PublicFilters PluginNumFilters)
