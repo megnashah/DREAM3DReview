@@ -9,8 +9,10 @@
 #include "SIMPLib/Filtering/AbstractFilter.h"
 #include "itkImageRegistrationMethodv4.h"
 #include "SIMPLib/ITK/itkInPlaceDream3DDataToImageFilter.h"
-
+#include "SIMPLib/FilterParameters/FileListInfoFilterParameter.h"
+#include "SIMPLib/Geometry/TransformContainer.h"
 #include "DREAM3DReview/DREAM3DReviewDLLExport.h"
+
 
 
 
@@ -28,6 +30,9 @@ class DREAM3DReview_EXPORT ITKPairwiseImageRegistration : public AbstractFilter
 		PYB11_CREATE_BINDINGS(ITKPairwiseImageRegistration SUPERCLASS AbstractFilter)
 		PYB11_PROPERTY(DataArrayPath FixedImageArrayPath READ getFixedImageArrayPath WRITE setFixedImageArrayPath)
 		PYB11_PROPERTY(DataArrayPath MovingImageArrayPath READ getMovingImageArrayPath WRITE setMovingImageArrayPath)
+		PYB11_PROPERTY(FileListInfo_t MovingFileListInfo READ getMovingFileListInfo WRITE setMovingFileListInfo)
+		PYB11_PROPERTY(FileListInfo_t FixedFileListInfo READ getFixedFileListInfo WRITE setFixedFileListInfo)
+		PYB11_PROPERTY(QString TransformFile READ getTransformFile WRITE setTransformFile)
 
 		// clang-format on
 
@@ -38,11 +43,23 @@ public:
 
 		~ITKPairwiseImageRegistration() override;
 
-	SIMPL_FILTER_PARAMETER(DataArrayPath, FixedImageArrayPath)
+		SIMPL_FILTER_PARAMETER(QString, TransformFile)
+		Q_PROPERTY(QString TransformFile READ getTransformFile WRITE setTransformFile)
+
+		SIMPL_FILTER_PARAMETER(FileListInfo_t, MovingFileListInfo)
+		Q_PROPERTY(FileListInfo_t MovingFileListInfo READ getMovingFileListInfo WRITE setMovingFileListInfo)
+
+		SIMPL_FILTER_PARAMETER(FileListInfo_t, FixedFileListInfo)
+		Q_PROPERTY(FileListInfo_t FixedFileListInfo READ getFixedFileListInfo WRITE setFixedFileListInfo)
+
+		SIMPL_FILTER_PARAMETER(DataArrayPath, FixedImageArrayPath)
 		Q_PROPERTY(DataArrayPath FixedImageArrayPath READ getFixedImageArrayPath WRITE setFixedImageArrayPath)
 
 		SIMPL_FILTER_PARAMETER(DataArrayPath, MovingImageArrayPath)
 		Q_PROPERTY(DataArrayPath MovingImageArrayPath READ getMovingImageArrayPath WRITE setMovingImageArrayPath)
+
+		SIMPL_FILTER_PARAMETER(int, OperationMode)
+		Q_PROPERTY(int OperationMode READ getOperationMode WRITE setOperationMode)
 
 		SIMPL_FILTER_PARAMETER(int, TransformType)
 		Q_PROPERTY(int TransformType READ getTransformType WRITE setTransformType)
@@ -173,8 +190,14 @@ private:
 	DEFINE_IDATAARRAY_VARIABLE(MovingImage)
 	DEFINE_IDATAARRAY_VARIABLE(FixedImage)
 
-	void registerImagePair2D();
-	template <typename T> void convertToDouble(std::weak_ptr<IDataArray> imagePtr, DataArrayPath dataArrayPath, QString dataArrayName);
+	void registerImagePair2D(DataContainerArray::Pointer dca, size_t sliceNo, hid_t fileId);
+	int writeFixedImageInfo2DtoHDF5(hid_t parentId, size_t sliceNo, itk::Dream3DImage<double, 2>::Pointer fixedImage);
+	int checkInputFileList(FileListInfo_t inputFileListInfo);
+	QVector<QString> getFileList(FileListInfo_t inputFileListInfo);
+	template <typename T> void convertToDouble(std::weak_ptr<IDataArray> imagePtr, DataArrayPath dataArrayPath, QString dataArrayName, DataContainerArray::Pointer dca);
+	void SinglePairRegistration();
+	void SeriesPairRegistration();
+
 
 public:
 	/* Rule of 5: All special member functions should be defined if any are defined.

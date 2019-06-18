@@ -79,6 +79,7 @@ set(_PublicFilters
   InsertTransformationPhases
   TiDwellFatigueCrystallographicAnalysis
   ITKPairwiseImageRegistration
+  ITKResampleImage
 )
 
 list(LENGTH _PublicFilters PluginNumFilters)
