@@ -9,6 +9,7 @@
 #include "SIMPLib/Filtering/AbstractFilter.h"
 #include "SIMPLib/ITK/itkInPlaceDream3DDataToImageFilter.h"
 #include "SIMPLib/Geometry/TransformContainer.h"
+#include "SIMPLib/FilterParameters/FileListInfoFilterParameter.h"
 
 #include "DREAM3DReview/DREAM3DReviewFilters/util/ITKTransformHelpers.h"
 #include "DREAM3DReview/DREAM3DReviewPlugin.h"
@@ -27,7 +28,12 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
 	PYB11_PROPERTY(DataArrayPath DataContainerName READ getDataContainerName WRITE setDataContainerName)
 	PYB11_PROPERTY(QString CellAttributeMatrixName READ getCellAttributeMatrixName WRITE setCellAttributeMatrixName)
 	PYB11_PROPERTY(QString ImageDataArrayName READ getImageDataArrayName WRITE setImageDataArrayName)
-
+	PYB11_PROPERTY(FileListInfo_t ImageFileListInfo READ getImageFileListInfo WRITE setImageFileListInfo)
+	PYB11_PROPERTY(FileListInfo_t OrientationFileListInfo READ getOrientationFileListInfo WRITE setOrientationFileListInfo)
+	PYB11_PROPERTY(QString OutputPath READ getOutputPath WRITE setOutputPath)
+	PYB11_PROPERTY(QString OutputPathEBSD READ getOutputPathEBSD WRITE setOutputPathEBSD)
+	PYB11_PROPERTY(QString FileNamePrefix READ getFileNamePrefix WRITE setFileNamePrefix)
+	PYB11_PROPERTY(QString EBSDFileNamePrefix READ getEBSDFileNamePrefix WRITE setEBSDFileNamePrefix)
 
     // clang-format on
 
@@ -37,6 +43,18 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
     SIMPL_TYPE_MACRO_SUPER(ITKResampleImage, AbstractFilter)
 
     ~ITKResampleImage() override;
+
+	SIMPL_FILTER_PARAMETER(QString, OutputPath)
+	Q_PROPERTY(QString OutputPath READ getOutputPath WRITE setOutputPath)
+
+	SIMPL_FILTER_PARAMETER(QString, FileNamePrefix)
+	Q_PROPERTY(QString FileNamePrefix READ getFileNamePrefix WRITE setFileNamePrefix)
+
+	SIMPL_FILTER_PARAMETER(QString, EBSDFileNamePrefix)
+	Q_PROPERTY(QString EBSDFileNamePrefix READ getEBSDFileNamePrefix WRITE setEBSDFileNamePrefix)
+
+	SIMPL_FILTER_PARAMETER(QString, OutputPathEBSD)
+	Q_PROPERTY(QString OutputPathEBSD READ getOutputPathEBSD WRITE setOutputPathEBSD)
 
     SIMPL_FILTER_PARAMETER(QString, TransformFileName)
     Q_PROPERTY(QString TransformFileName READ getTransformFileName WRITE setTransformFileName)
@@ -55,6 +73,15 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
 
 	SIMPL_FILTER_PARAMETER(QString, ImageDataArrayName)
 	Q_PROPERTY(QString ImageDataArrayName READ getImageDataArrayName WRITE setImageDataArrayName)
+
+	SIMPL_FILTER_PARAMETER(int, OperationMode)
+	Q_PROPERTY(int OperationMode READ getOperationMode WRITE setOperationMode)
+
+	SIMPL_FILTER_PARAMETER(FileListInfo_t, ImageFileListInfo)
+	Q_PROPERTY(FileListInfo_t ImageFileListInfo READ getImageFileListInfo WRITE setImageFileListInfo)
+	
+	SIMPL_FILTER_PARAMETER(FileListInfo_t, OrientationFileListInfo)
+	Q_PROPERTY(FileListInfo_t OrientationFileListInfo READ getOrientationFileListInfo WRITE setOrientationFileListInfo)
 
 
     /**
@@ -159,6 +186,9 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
 	  template <typename T> void Resample2D();
 	  ITKTransformHelpers getTransformAndFixedParams(QString sliceNo);
 	  template <typename T> void createCompatibleArrays();
+	  int checkInputFileList(FileListInfo_t inputFileListInfo);
+	  QVector<QString> getFileList(FileListInfo_t inputFileListInfo);
+	  void SeriesResampling();
 	  
   public:
     /* Rule of 5: All special member functions should be defined if any are defined.

@@ -201,12 +201,12 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 
 
 	parameters.push_back(SIMPL_NEW_FILELISTINFO_FP("Fixed Image File List", FixedFileListInfo, FilterParameter::Parameter, ITKPairwiseImageRegistration));
-	FileListInfoFilterParameter::Pointer movingFileList = std::dynamic_pointer_cast<FileListInfoFilterParameter>(parameters.back());
-	movingFileList->setGroupIndex(1);
+	FileListInfoFilterParameter::Pointer fixedFileList = std::dynamic_pointer_cast<FileListInfoFilterParameter>(parameters.back());
+	fixedFileList->setGroupIndex(1);
 
 	parameters.push_back(SIMPL_NEW_FILELISTINFO_FP("Moving Image File List", MovingFileListInfo, FilterParameter::Parameter, ITKPairwiseImageRegistration));
-	FileListInfoFilterParameter::Pointer fixedFileList =   std::dynamic_pointer_cast<FileListInfoFilterParameter>(parameters.back());
-	fixedFileList->setGroupIndex(1);
+	FileListInfoFilterParameter::Pointer movingFileList =   std::dynamic_pointer_cast<FileListInfoFilterParameter>(parameters.back());
+	movingFileList->setGroupIndex(1);
 
 
 	setFilterParameters(parameters);
