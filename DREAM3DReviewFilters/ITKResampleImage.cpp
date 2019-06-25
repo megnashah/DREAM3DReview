@@ -5,6 +5,9 @@
 
 #include "ITKResampleImage.h"
 
+#include <map>
+#include <QtCore/QFile>
+
 #include "SIMPLib/Common/Constants.h"
 
 #include "SIMPLib/FilterParameters/InputFileFilterParameter.h"
@@ -40,10 +43,8 @@
 #include "SIMPLib/Utilities/FileSystemPathHelper.h"
 #include "EbsdLib/EbsdLib.h"
 #include "EbsdLib/EbsdConstants.h"
-
-
-
-
+#include "EBsdLib/HKL/CtfReader.h"
+#include "util/EBSDWriterFactory.h"
 
 
 enum createdPathID : RenameDataPath::DataID_t
@@ -63,7 +64,22 @@ enum createdPathID : RenameDataPath::DataID_t
 ITKResampleImage::ITKResampleImage() 
 :  m_TransformFileName("")
 ,  m_InterpolationType(0)
+, m_DataContainerName("ResampledDataDC", "", "")
+, m_CellAttributeMatrixName("ResampledDataAM")
+, m_ImageDataArrayName("ResampledData")
 {
+	m_ctfDataArrayNames.push_back("Phases");
+	m_ctfDataArrayNames.push_back("X");
+	m_ctfDataArrayNames.push_back("Y");
+	m_ctfDataArrayNames.push_back("Bands");
+	m_ctfDataArrayNames.push_back("Error");
+	m_ctfDataArrayNames.push_back("EulerAngles");
+	m_ctfDataArrayNames.push_back("MAD");
+	m_ctfDataArrayNames.push_back("BC");
+	m_ctfDataArrayNames.push_back("BS");
+	
+	
+
 
 	m_ImageFileListInfo.FileExtension = QString("tif");
 	m_ImageFileListInfo.StartIndex = 0;
@@ -197,13 +213,15 @@ QVector<QString> ITKResampleImage::getFileList(FileListInfo_t inputFileListInfo)
 		inputFileListInfo.PaddingDigits);
 }
 
-int ITKResampleImage::checkInputFileList(FileListInfo_t inputFileListInfo)
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int32_t ITKResampleImage::checkInputFileList(FileListInfo_t inputFileListInfo)
 {
-
 	DataArrayPath tempPath;
 	QString ss;
 
-	if (inputFileListInfo.InputPath.isEmpty())
+	if(inputFileListInfo.InputPath.isEmpty())
 	{
 		ss = QObject::tr("The moving image input directory must be set");
 		setErrorCondition(-64500, ss);
@@ -223,85 +241,85 @@ int ITKResampleImage::checkInputFileList(FileListInfo_t inputFileListInfo)
 
 	// Now generate all the file names the user is asking for and populate the table
 	const QVector<QString> fileList = this->getFileList(inputFileListInfo);
-	if (fileList.empty())
-	{
-		ss.clear();
-		QTextStream out(&ss);
-		out << " No files have been selected for import. Have you set the input directory and other values so that input files will be generated?\n";
-		out << "InputPath: " << inputFileListInfo.InputPath << "\n";
-		out << "FilePrefix: " << inputFileListInfo.FilePrefix << "\n";
-		out << "FileSuffix: " << inputFileListInfo.FileSuffix << "\n";
-		out << "FileExtension: " << inputFileListInfo.FileExtension << "\n";
-		out << "PaddingDigits: " << inputFileListInfo.PaddingDigits << "\n";
-		out << "StartIndex: " << inputFileListInfo.StartIndex << "\n";
-		out << "EndIndex: " << inputFileListInfo.EndIndex << "\n";
-		setErrorCondition(-64501, ss);
-		return -1;
-	}
+	//if (fileList.empty())
+	//{
+	//	ss.clear();
+	//	QTextStream out(&ss);
+	//	out << " No files have been selected for import. Have you set the input directory and other values so that input files will be generated?\n";
+	//	out << "InputPath: " << inputFileListInfo.InputPath << "\n";
+	//	out << "FilePrefix: " << inputFileListInfo.FilePrefix << "\n";
+	//	out << "FileSuffix: " << inputFileListInfo.FileSuffix << "\n";
+	//	out << "FileExtension: " << inputFileListInfo.FileExtension << "\n";
+	//	out << "PaddingDigits: " << inputFileListInfo.PaddingDigits << "\n";
+	//	out << "StartIndex: " << inputFileListInfo.StartIndex << "\n";
+	//	out << "EndIndex: " << inputFileListInfo.EndIndex << "\n";
+	//	setErrorCondition(-64501, ss);
+	//	return -1;
+	//}
 
-	// Validate all the files in the list. Throw an error for each one if it does not exist
-	for (const auto& filePath : fileList)
-	{
-		QFileInfo fi(filePath);
-		if (!fi.exists())
-		{
-			QString errorMessage = QString("File does not exist: %1").arg(filePath);
-			setErrorCondition(-64502, errorMessage);
-		}
-	}
-	if (getErrorCode() < 0)
-	{
-		return -1;
-	}
+	//// Validate all the files in the list. Throw an error for each one if it does not exist
+	//for (const auto& filePath : fileList)
+	//{
+	//	QFileInfo fi(filePath);
+	//	if (!fi.exists())
+	//	{
+	//		QString errorMessage = QString("File does not exist: %1").arg(filePath);
+	//		setErrorCondition(-64502, errorMessage);
+	//	}
+	//}
+	//if (getErrorCode() < 0)
+	//{
+	//	return -1;
+	//}
 
 
 
-	// Create a subfilter to read each image, although for preflight we are going to read the first image in the
-	// list and hope the rest are correct.
-	if (m_OperationMode == 1) ///////FOR IMAGE DATA
-	{
-		FilterManager* fm = FilterManager::Instance();
-		IFilterFactory::Pointer factory = fm->getFactoryFromClassName("ITKImageReader");
-		if (factory.get() == nullptr)
-		{
-			QString ss = QObject::tr("Unable to instantiate Filter with name 'ITKImageReader'\n"
-				"The 'ITKImageReader' Filter is needed to import the image");
-			setErrorCondition(-1, ss);
-		}
-		AbstractFilter::Pointer itkImageReader = factory->create();
-		DataContainerArray::Pointer dca = DataContainerArray::New();
-		itkImageReader->setDataContainerArray(dca);
-		QVariant var;
-		var.setValue(fileList[0]);
-		itkImageReader->setProperty("FileName", var);
-		itkImageReader->preflight();
-		if (itkImageReader->getErrorCode() < 0)
-		{
-			setErrorCondition(itkImageReader->getErrorCode(), "Error Reading Input Image.");
-			return -1;
-		}
-	}
+	//// Create a subfilter to read each image, although for preflight we are going to read the first image in the
+	//// list and hope the rest are correct.
+	//if (m_OperationMode == 1) ///////FOR IMAGE DATA
+	//{
+	//	FilterManager* fm = FilterManager::Instance();
+	//	IFilterFactory::Pointer factory = fm->getFactoryFromClassName("ITKImageReader");
+	//	if (factory.get() == nullptr)
+	//	{
+	//		QString ss = QObject::tr("Unable to instantiate Filter with name 'ITKImageReader'\n"
+	//			"The 'ITKImageReader' Filter is needed to import the image");
+	//		setErrorCondition(-1, ss);
+	//	}
+	//	AbstractFilter::Pointer itkImageReader = factory->create();
+	//	DataContainerArray::Pointer dca = DataContainerArray::New();
+	//	itkImageReader->setDataContainerArray(dca);
+	//	QVariant var;
+	//	var.setValue(fileList[0]);
+	//	itkImageReader->setProperty("FileName", var);
+	//	itkImageReader->preflight();
+	//	if (itkImageReader->getErrorCode() < 0)
+	//	{
+	//		setErrorCondition(itkImageReader->getErrorCode(), "Error Reading Input Image.");
+	//		return -1;
+	//	}
+	//}
 
-	if (m_OperationMode == 2) ////////// FOR ORIENATION DATA
-	{
-		// Based on the type of file (.ang or .ctf) get the list of arrays that would be created
-		QFileInfo fi(fileList.front());
-		QString ext = fi.suffix();
-		if (ext.compare("ang") == 0)
-		{
-			// ebsdFeatures = new AngFields;
-		}
-		else if (ext.compare("ctf") == 0)
-		{
-			// ebsdFeatures = new CtfFields;
-		}
-		else
-		{
-			ss = QObject::tr("The file extension '%1' was not recognized. Currently .ang or .ctf are the only recognized file extensions").arg(ext);
-			setErrorCondition(-997, ss);
-			return -1;
-		}
-	}
+	//if (m_OperationMode == 2) ////////// FOR ORIENATION DATA
+	//{
+	//	// Based on the type of file (.ang or .ctf) get the list of arrays that would be created
+	//	QFileInfo fi(fileList.front());
+	//	QString ext = fi.suffix();
+	//	if (ext.compare("ang") == 0)
+	//	{
+	//		// ebsdFeatures = new AngFields;
+	//	}
+	//	else if (ext.compare("ctf") == 0)
+	//	{
+	//		// ebsdFeatures = new CtfFields;
+	//	}
+	//	else
+	//	{
+	//		ss = QObject::tr("The file extension '%1' was not recognized. Currently .ang or .ctf are the only recognized file extensions").arg(ext);
+	//		setErrorCondition(-997, ss);
+	//		return -1;
+	//	}
+	//}
 
 	return fileList.size();
 
@@ -353,9 +371,9 @@ void ITKResampleImage::dataCheck()
 	  hid_t fileId = QH5Utilities::openFile(m_TransformFileName, true);
 	  QStringList groupObjects; 
 	  QH5Utilities::getGroupObjects(fileId, H5Utilities::H5Support_GROUP, groupObjects);
-	  int numTransformObjects = groupObjects.size();
+	  int32_t numTransformObjects = groupObjects.size();
 
-	  int numImages = checkInputFileList(m_ImageFileListInfo);
+	  int32_t numImages = checkInputFileList(m_ImageFileListInfo);
 
 	  if (numTransformObjects != numImages)
 	  {
@@ -367,9 +385,9 @@ void ITKResampleImage::dataCheck()
 	  hid_t fileId = QH5Utilities::openFile(m_TransformFileName, true);
 	  QStringList groupObjects;
 	  QH5Utilities::getGroupObjects(fileId, H5Utilities::H5Support_GROUP, groupObjects);
-	  int numTransformObjects = groupObjects.size();
+	  int32_t numTransformObjects = groupObjects.size();
 
-	  int numOrientationFiles = checkInputFileList(m_OrientationFileListInfo);
+	  int32_t numOrientationFiles = checkInputFileList(m_OrientationFileListInfo);
 
 	  if (numTransformObjects != numOrientationFiles)
 	  {
@@ -414,16 +432,16 @@ TransformType::Pointer transform = TransformType::New();\
 TransformType::MeshSizeType meshSize;\
 meshSize.Fill(3);\
 transform->SetTransformDomainMeshSize(meshSize);\
-int numFixedElements = d3dtransform->getFixedParameters().size();\
+int32_t numFixedElements = d3dtransform->getFixedParameters().size();\
 TransformType::FixedParametersType fixedParameters(numFixedElements);\
-for (int i = 0; i < numFixedElements; i++)\
+for (int32_t i = 0; i < numFixedElements; i++)\
 {\
 	fixedParameters.SetElement(i, d3dtransform->getFixedParameters()[i]);\
 }\
 transform->SetFixedParameters(fixedParameters);\
-int numLearnedElements = d3dtransform->getParameters().size();\
+int32_t numLearnedElements = d3dtransform->getParameters().size();\
 TransformType::ParametersType learnedParameters(numLearnedElements);\
-for (int i = 0; i < numLearnedElements; i++)\
+for (int32_t i = 0; i < numLearnedElements; i++)\
 {\
 	learnedParameters.SetElement(i, d3dtransform->getParameters()[i]);\
 }\
@@ -582,7 +600,7 @@ void ITKResampleImage::SeriesResampling()
 
 
 	size_t startIndex = m_ImageFileListInfo.StartIndex; 
-	for (int i = 0; i < inputImageList.size(); i++)
+	for (int32_t i = 0; i < inputImageList.size(); i++)
 	{
 		DataArrayPath movingpath("_INTERNAL_USE_ONLY_MovingImageDataContainerName", "_INTERNAL_USE_ONLY_attributeMatrixName", "_INTERNAL_USE_ONLY_imageDataArrayName");
 		setMovingImageArrayPath(movingpath);
@@ -663,6 +681,278 @@ void ITKResampleImage::SeriesResampling()
 	}
 }
 
+QString ITKResampleImage::GetAndModifyHeader(QFile& reader, SizeVec3Type dims, FloatVec3Type spacing)
+{
+	QString ctfheader("");
+	QString altLine("");
+	QList<QByteArray> headerLines;
+	int32_t err = 0;
+	QByteArray buf;
+	bool ok = false;
+	int32_t numPhases = -1;
+	bool headerComplete = false;
+	while (!reader.atEnd() && !headerComplete)
+	{
+		buf = reader.readLine();
+		if (buf.startsWith("XStep"))
+		{
+			altLine = "XStep	" +  QString::number(spacing[0], 'f', 13) + '\n';
+			ctfheader.append(altLine);
+		}
+		else if (buf.startsWith("YStep"))
+		{
+			altLine = "YStep	" + QString::number(spacing[0], 'f', 13) + '\n';
+			//+ QString::number(spacing[1]) + 
+			ctfheader.append(altLine);
+		}
+		else if (buf.startsWith("XCells"))
+		{
+			altLine = "XCells	" + QString::number(dims[0]) + '\n';
+			ctfheader.append(altLine);
+		}
+		else if (buf.startsWith("YCells"))
+		{
+			altLine = "YCells	" + QString::number(dims[1])+ '\n';
+			ctfheader.append(altLine);
+		}
+		else
+		{
+			ctfheader.append(QString(buf));
+		}
+		// Append the line to the complete header
+
+		// remove the newline at the end of the line
+		buf.chop(1);
+		headerLines.push_back(buf);
+		if (buf.startsWith("Phases"))
+		{
+			QList<QByteArray> tokens = buf.split('\t');
+			numPhases = tokens.at(1).toInt(&ok, 10);
+			break; //
+		}
+	}
+
+
+	
+	// Now read the phases line
+	for (int32_t p = 0; p < numPhases; ++p)
+	{
+		buf = reader.readLine();
+		ctfheader.append(QString(buf));
+
+		// remove the newline at the end of the line
+		buf.chop(1);
+		headerLines.push_back(buf);
+	}
+
+	//one more line for column headings
+	buf = reader.readLine(); 
+	ctfheader.append(QString(buf));
+
+	headerComplete = true;
+
+	return ctfheader;
+}
+
+void ITKResampleImage::WriteResampledCTFfile(QString filename, std::vector<IDataArray::Pointer> ctfArrays, SizeVec3Type dims, FloatVec3Type spacing, size_t index)
+{
+	QFile in(filename);
+	if (!in.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		QString msg = QString("Ctf file could not be opened: ") + filename;
+		setErrorCondition(-100, msg);
+		return;
+	}
+
+
+	QString header = GetAndModifyHeader(in, dims, spacing);
+	QString outfile = m_OutputPathEBSD + "/" + m_EBSDFileNamePrefix + QString::number(index) + "." + m_OrientationFileListInfo.FileExtension;
+
+	QFile file(outfile);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return;
+
+	QTextStream out(&file);
+	out << header;
+
+	EBSDWriterFactory* factory = EBSDWriterFactory::Instance();
+
+	int32_t arrayIndex = 0;
+	for (int32_t i = 0; i < dims[0]; i++)
+	{
+		for (int32_t j = 0; j < dims[1]; j++)
+		{
+			QString rowData("");
+			for (int32_t k = 0; k < ctfArrays.size(); k++)
+			{				
+				std::function<QString(QString, IDataArray::Pointer, uint64_t)> writer = factory->getWriter(m_ctfDataArrayNames[k]);
+				rowData = writer(rowData, ctfArrays[k], arrayIndex);
+				if (k == (ctfArrays.size() - 1))
+				{
+					rowData.append('\n');
+				}
+				else
+				{
+					rowData.append("	");
+				}
+			}
+			out << rowData;
+			arrayIndex++;
+		}
+	}
+
+	
+	
+}
+
+void ITKResampleImage::EBSDSeriesResampling()
+{
+	QVector<QString> inputEBSDFileList = getFileList(m_OrientationFileListInfo);
+
+	FilterManager* fm = FilterManager::Instance();
+
+	IFilterFactory::Pointer factory = fm->getFactoryFromClassName("ReadCtfData");
+	if (factory.get() == nullptr)
+	{
+		QString ss = QObject::tr("Unable to instantiate Filter with name 'ReadCtfData'\n"
+			"The 'ReadCtfData' Filter is needed to import EBSD data");
+		setErrorCondition(-1, ss);
+	}
+	AbstractFilter::Pointer ctfReader = factory->create();
+
+	size_t index = m_OrientationFileListInfo.StartIndex;
+	for (int32_t i = 0; i < inputEBSDFileList.size(); i++)
+	{
+		ctfReader->setDataContainerArray(getDataContainerArray());
+
+		QVariant dcName;
+		DataArrayPath pathname("_INTERNAL_USE_ONLY_MovingEBSDDataContainerName", "", "");
+		dcName.setValue(pathname);
+		ctfReader->setProperty("DataContainerName", dcName);
+
+		QVariant amName;
+		amName.setValue(QString("_INTERNAL_USE_ONLY_attributeMatrixName"));
+		ctfReader->setProperty("CellAttributeMatrixName", amName);
+
+		QVariant ensembleName;
+		ensembleName.setValue(QString("_INTERNAL_USE_ONLY_ensembleAttributeMatrixName"));
+		ctfReader->setProperty("CellEnsembleAttributeMatrixName", ensembleName);
+
+		QVariant var;
+		var.setValue(inputEBSDFileList[i]);
+		ctfReader->setProperty("InputFile", var);
+
+		QVariant degtorad;
+		degtorad.setValue(false);
+		ctfReader->setProperty("DegreesToRadians", degtorad);
+
+		QVariant hexalign;
+		hexalign.setValue(false);
+		ctfReader->setProperty("EdaxHexagonalAlignment", hexalign);
+
+		ctfReader->execute();
+
+		DataArrayPath movingpath("_INTERNAL_USE_ONLY_MovingEBSDDataContainerName", "_INTERNAL_USE_ONLY_attributeMatrixName", "");
+		setMovingImageArrayPath(movingpath);
+
+		std::vector<IDataArray::Pointer> ctfArrays(m_ctfDataArrayNames.size(), nullptr);
+
+		ImageGeom::Pointer finalImage;
+		SizeVec3Type dims;
+		FloatVec3Type spacing;
+
+		for (int32_t j = 0; j < m_ctfDataArrayNames.size(); j++)
+		{
+			movingpath.setDataArrayName(m_ctfDataArrayNames[j]);
+			setMovingImageArrayPath(movingpath);
+
+			DataContainer::Pointer m = getDataContainerArray()->createNonPrereqDataContainer<AbstractFilter>(this, getDataContainerName(), DataContainerID);
+			if (getErrorCode() < 0)
+			{
+				return;
+			}
+
+			// Create the Image Geometry
+			ImageGeom::Pointer image = ImageGeom::CreateGeometry(SIMPL::Geometry::ImageGeometry);
+			m->setGeometry(image);
+
+
+			QVector<size_t> tDims(3, 0);
+			AttributeMatrix::Pointer cellAttrMat = m->createNonPrereqAttributeMatrix(this, getCellAttributeMatrixName(), tDims, AttributeMatrix::Type::Cell, AttributeMatrixID21);
+			if (getErrorCode() < 0)
+			{
+				return;
+			}
+
+			m_MovingImagePtr = getDataContainerArray()->getPrereqIDataArrayFromPath<IDataArray, AbstractFilter>(this, getMovingImageArrayPath()); /* Assigns the shared_ptr<> to an instance variable that is a weak_ptr<> */
+			EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, createCompatibleArrays, m_MovingImagePtr.lock())
+			EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock())
+
+			finalImage = getDataContainerArray()->getDataContainer(m_DataContainerName)->getGeometryAs<ImageGeom>();
+			dims = finalImage->getDimensions();
+			spacing = finalImage->getSpacing();
+
+			if (m_ctfDataArrayNames[j] == "X")
+			{
+				IDataArray::Pointer X = getDataContainerArray()->getDataContainer(m_DataContainerName)->getAttributeMatrix(m_CellAttributeMatrixName)->getAttributeArray(m_ImageDataArrayName);
+				DataArray<float>::Pointer XFloat = std::dynamic_pointer_cast<DataArray<float>>(X);
+
+				int32_t xIndex = 0;
+				for (int32_t yVals = 0; yVals < dims[1]; yVals++)
+				{
+					for (int32_t xVals = 0; xVals < dims[0]; xVals++)
+					{
+						XFloat->setValue(xIndex, xVals * spacing[0]);
+						xIndex++;
+					}
+				}
+			}
+
+			if (m_ctfDataArrayNames[j] == "Y")
+			{
+
+				IDataArray::Pointer Y = getDataContainerArray()->getDataContainer(m_DataContainerName)->getAttributeMatrix(m_CellAttributeMatrixName)->getAttributeArray(m_ImageDataArrayName);
+				DataArray<float>::Pointer YFloat = std::dynamic_pointer_cast<DataArray<float>>(Y);
+
+				int32_t yIndex = 0;
+				for (int32_t yVals = 0; yVals < dims[1]; yVals++)
+				{
+					for (int32_t xVals = 0; xVals < dims[0]; xVals++)
+					{
+						YFloat->setValue(yIndex, yVals * spacing[0]);
+						yIndex++;
+					}
+				}
+			}
+
+
+
+
+
+
+
+			//This is a vector of all the arrays stored from reading in the CTF file
+			ctfArrays[j] = getDataContainerArray()->getDataContainer(m_DataContainerName)->getAttributeMatrix(m_CellAttributeMatrixName)->getAttributeArray(m_ImageDataArrayName)->deepCopy();
+			
+			getDataContainerArray()->removeDataContainer(m_DataContainerName.getDataContainerName());
+
+
+		}
+		getDataContainerArray()->removeDataContainer("_INTERNAL_USE_ONLY_MovingEBSDDataContainerName");
+
+		WriteResampledCTFfile(inputEBSDFileList[i], ctfArrays, dims, spacing, index);
+
+		index++;
+
+	}
+
+
+
+
+
+
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -696,6 +986,10 @@ void ITKResampleImage::execute()
   else if (m_OperationMode == 1)
   {
 	  SeriesResampling();
+  }
+  else if (m_OperationMode == 2)
+  {
+	  EBSDSeriesResampling();
   }
 
 

@@ -578,6 +578,7 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 		typedef itk::CenteredTransformInitializer<TransformType, ImageType, ImageType> TranformInitializerType; 
 		TranformInitializerType::Pointer transformInitializer = TranformInitializerType::New();
 		transformInitializer->SetTransform(transform);
+		transformInitializer->GeometryOn();
 		transformInitializer->SetFixedImage(itkFixedImage);
 		transformInitializer->SetMovingImage(itkMovingImage);
 		transformInitializer->GeometryOn(); 
@@ -589,7 +590,7 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 
 	if (m_TransformType == 2)
 	{
-		typedef itk::TranslationTransform<double, ImageDimension> TransformType; 
+		typedef itk::AffineTransform<double, ImageDimension> TransformType; 
 		TransformType::Pointer transform = TransformType::New();
 
 		TransformType::ParametersType initialParameters(transform->GetNumberOfParameters()); 

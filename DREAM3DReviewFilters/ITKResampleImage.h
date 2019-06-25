@@ -3,7 +3,7 @@
  */
 
 #pragma once
-
+#include <QtCore/QFile>
 #include "SIMPLib/SIMPLib.h"
 #include "SIMPLib/Common/SIMPLibSetGetMacros.h"
 #include "SIMPLib/Filtering/AbstractFilter.h"
@@ -186,9 +186,13 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
 	  template <typename T> void Resample2D();
 	  ITKTransformHelpers getTransformAndFixedParams(QString sliceNo);
 	  template <typename T> void createCompatibleArrays();
-	  int checkInputFileList(FileListInfo_t inputFileListInfo);
+	  int32_t checkInputFileList(FileListInfo_t inputFileListInfo);
 	  QVector<QString> getFileList(FileListInfo_t inputFileListInfo);
 	  void SeriesResampling();
+	  void EBSDSeriesResampling();
+	  QString GetAndModifyHeader(QFile& reader, SizeVec3Type dims, FloatVec3Type spacing);
+	  void WriteResampledCTFfile(QString filename, std::vector<IDataArray::Pointer> ctfArrays, SizeVec3Type dims, FloatVec3Type spacing, size_t index);
+	  QVector<QString> m_ctfDataArrayNames;
 	  
   public:
     /* Rule of 5: All special member functions should be defined if any are defined.
