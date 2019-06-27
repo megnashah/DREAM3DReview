@@ -10,6 +10,7 @@
 #include "SIMPLib/FilterParameters/ChoiceFilterParameter.h"
 #include "SIMPLib/FilterParameters/DataArraySelectionFilterParameter.h"
 #include "SIMPLib/FilterParameters/IntFilterParameter.h"
+#include "SIMPLib/FilterParameters/BooleanFilterParameter.h"
 #include "SIMPLib/FilterParameters/FileListInfoFilterParameter.h"
 #include "SIMPLib/Utilities/FilePathGenerator.h"
 #include "SIMPLib/FilterParameters/FloatFilterParameter.h"
@@ -32,6 +33,9 @@
 #include "itkCorrelationImageToImageMetricv4.h"
 #include "itkResampleImageFilter.h"
 #include "itkTransformFileWriter.h"
+#include "itkFFTNormalizedCorrelationImageFilter.h"
+#include "itkMaskedFFTNormalizedCorrelationImageFilter.h"
+#include "itkMinimumMaximumImageCalculator.h"
 #include "SIMPLib/FilterParameters/OutputFileFilterParameter.h"
 #include "SIMPLib/ITK/itkInPlaceDream3DDataToImageFilter.h"
 #include "SIMPLib/Common/TemplateHelpers.h"
@@ -40,6 +44,8 @@
 #include "SIMPLib/Filtering/FilterManager.h"
 #include "SIMPLib/Utilities/FileSystemPathHelper.h"
 #include "H5Support/H5ScopedSentinel.h"
+#include "SIMPLib/FilterParameters/FloatVec3FilterParameter.h"
+#include "SIMPLib/FilterParameters/LinkedBooleanFilterParameter.h"
 
 
 
@@ -58,12 +64,22 @@ ITKPairwiseImageRegistration::ITKPairwiseImageRegistration()
 	, m_OperationMode(0)
 	, m_BSplineOrder(3)
 	, m_MeshSize(3)
+  , m_Metric(0)
 	, m_MaximumNumberOfFunctionEvaluations(1000)
 	, m_NumberOfIterations(100)
 	, m_GradientConvergenceTolerance(1e-5)
+  , m_LearningRate(0.5)
 	, m_MovingImage(nullptr)
 	, m_FixedImage(nullptr)
 	, m_TransformFile("")
+  , m_MovingOrigin(0, 0, 0)
+  , m_MovingSpacing(1.0, 1.0, 1.0)
+  , m_FixedOrigin(0, 0, 0)
+  , m_FixedSpacing(1.0, 1.0, 1.0)
+  , m_ChangeOriginResolution(false)
+  , m_Optimizer(0)
+  , m_InitializeAffineWithFFT(true)
+  , m_InitializeRigidWithFFT(true)
 {
 
 	m_MovingFileListInfo.FileExtension = QString("tif");
@@ -143,7 +159,10 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 
 		QStringList linkedProps;
 		linkedProps << "MeshSize"
-			<< "BSplineOrder";
+			<< "BSplineOrder"
+      << "InitializeRigidWithFFT"
+      << "InitializeAffineWithFFT"
+      ;
 		parameter->setLinkedProperties(linkedProps);
 		parameter->setEditable(false);
 		parameter->setCategory(FilterParameter::Parameter);
@@ -186,6 +205,17 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 	optimizerparameter->setCategory(FilterParameter::Parameter);
 	parameters.push_back(optimizerparameter);
 
+  QStringList linkedProps;
+  linkedProps << "MovingOrigin"
+    << "FixedOrigin"
+    << "FixedSpacing"
+    << "MovingSpacing";
+  parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Origin/Resolution for Moving and Fixed are Different", ChangeOriginResolution, FilterParameter::Parameter, ITKPairwiseImageRegistration, linkedProps));
+  parameters.push_back(SIMPL_NEW_FLOAT_VEC3_FP("Moving Origin", MovingOrigin, FilterParameter::Parameter, ITKPairwiseImageRegistration));
+  parameters.push_back(SIMPL_NEW_FLOAT_VEC3_FP("Moving Spacing", MovingSpacing, FilterParameter::Parameter, ITKPairwiseImageRegistration));
+  parameters.push_back(SIMPL_NEW_FLOAT_VEC3_FP("Fixed Origin", FixedOrigin, FilterParameter::Parameter, ITKPairwiseImageRegistration));
+  parameters.push_back(SIMPL_NEW_FLOAT_VEC3_FP("Fixed Spacing", FixedSpacing, FilterParameter::Parameter, ITKPairwiseImageRegistration));
+
 
 
 	DataArraySelectionFilterParameter::RequirementType dasReq = DataArraySelectionFilterParameter::CreateRequirement(SIMPL::Defaults::AnyPrimitive, 1, AttributeMatrix::Type::Cell, IGeometry::Type::Image);
@@ -198,6 +228,10 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 	parameters.push_back(SIMPL_NEW_INTEGER_FP("Num Iterations", NumberOfIterations, FilterParameter::Parameter, ITKPairwiseImageRegistration));
 	parameters.push_back(SIMPL_NEW_FLOAT_FP("Learning Rate", LearningRate, FilterParameter::Parameter, ITKPairwiseImageRegistration, 2));
 	parameters.push_back(SIMPL_NEW_OUTPUT_FILE_FP("Output Transform File", TransformFile, FilterParameter::Parameter, ITKPairwiseImageRegistration));
+  parameters.push_back(SIMPL_NEW_BOOL_FP("Initialize Translation With FFT", InitializeRigidWithFFT, FilterParameter::Parameter, ITKPairwiseImageRegistration, 1));
+  parameters.push_back(SIMPL_NEW_BOOL_FP("Initialize Translation With FFT", InitializeAffineWithFFT, FilterParameter::Parameter, ITKPairwiseImageRegistration, 2));
+
+
 
 
 	parameters.push_back(SIMPL_NEW_FILELISTINFO_FP("Fixed Image File List", FixedFileListInfo, FilterParameter::Parameter, ITKPairwiseImageRegistration));
@@ -360,8 +394,30 @@ void ITKPairwiseImageRegistration::dataCheck()
 	if (m_MeshSize < m_BSplineOrder)
 	{
 		QString ss = QObject::tr("The mesh size cannot be smaller than the B-spline order");
-		setErrorCondition(-5555, ss);
+		setErrorCondition(-5556, ss);
 	}
+
+  if (m_TransformType == 1)
+  {
+    if ((m_FixedSpacing[0] != m_MovingSpacing[0] || m_FixedSpacing[1] != m_MovingSpacing[1]) && m_InitializeRigidWithFFT)
+    {
+      QString ss = QObject::tr("The spacing must be the same for fixed and moving to initialize with FFT");
+      setErrorCondition(-5557, ss);
+    }
+
+  }
+
+  if (m_TransformType == 2)
+  {
+    if ((m_FixedSpacing[0] != m_MovingSpacing[0] || m_FixedSpacing[1] != m_MovingSpacing[1]) && m_InitializeAffineWithFFT)
+    {
+      QString ss = QObject::tr("The spacing must be the same for fixed and moving to initialize with FFT");
+      setErrorCondition(-5558, ss);
+    }
+
+  }
+
+  
 
 
 
@@ -486,12 +542,6 @@ registration->SetInitialTransform(transform);
 //////////////END MACROS/////////////////////////////////
 
 
-
-
-
-
-
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -528,13 +578,37 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 
 	//////////////////////////////// SETUP ORIGIN _ RESOLUTION //////////////////////////////////////////////////
 
-	ImageType::PointType origin = (0, 0);
+  if (!m_ChangeOriginResolution)
+  {
+    ImageType::PointType itkfixedorigin = (0, 0);
+    ImageType::PointType itkmovingorigin = (0, 0);
 
-	itkFixedImage->SetSpacing(1);
-	itkFixedImage->SetOrigin(origin);
+    ImageType::SpacingType itkfixedspacing = (1.0, 1.0);
+    ImageType::SpacingType itkmovingspacing = (1.0, 1.0);
 
-	itkMovingImage->SetSpacing(1);
-	itkMovingImage->SetOrigin(origin);
+    itkFixedImage->SetSpacing(itkfixedspacing);
+    itkFixedImage->SetOrigin(itkfixedorigin);
+
+    itkMovingImage->SetSpacing(itkmovingspacing);
+    itkMovingImage->SetOrigin(itkmovingorigin);
+  }
+  else
+  {
+    ImageType::PointType itkfixedorigin = (m_FixedOrigin[0], m_FixedOrigin[1]);
+    ImageType::PointType itkmovingorigin = (m_MovingOrigin[0], m_MovingOrigin[1]);
+
+    ImageType::SpacingType itkfixedspacing = (m_FixedSpacing[0], m_FixedSpacing[1]);
+    ImageType::SpacingType itkmovingspacing = (m_MovingSpacing[0], m_MovingSpacing[1]);
+
+    itkFixedImage->SetSpacing(itkfixedspacing);
+    itkFixedImage->SetOrigin(itkfixedorigin);
+
+    itkMovingImage->SetSpacing(itkmovingspacing);
+    itkMovingImage->SetOrigin(itkmovingorigin);
+  }
+
+
+
 
 	//////////////////////////////// REGISTRATION //////////////////////////////////////////////////
 
@@ -577,6 +651,36 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 		TransformType::Pointer transform = TransformType::New(); 
 		typedef itk::CenteredTransformInitializer<TransformType, ImageType, ImageType> TranformInitializerType; 
 		TranformInitializerType::Pointer transformInitializer = TranformInitializerType::New();
+
+    if (m_InitializeRigidWithFFT)
+    {
+      typedef itk::Image<float, 2> FloatImageType;
+      typedef itk::FFTNormalizedCorrelationImageFilter<ImageType, FloatImageType> FFTNXcorrType;
+      FFTNXcorrType::Pointer fftfilter = FFTNXcorrType::New();
+      fftfilter->SetFixedImage(itkFixedImage);
+      fftfilter->SetMovingImage(itkMovingImage);
+      fftfilter->SetRequiredFractionOfOverlappingPixels(0.5);
+      fftfilter->Update();
+
+      using MinimumMaximumImageCalculatorType = itk::MinimumMaximumImageCalculator<FloatImageType>;
+      MinimumMaximumImageCalculatorType::Pointer minimumMaximumImageCalculatorFilter = MinimumMaximumImageCalculatorType::New();
+      minimumMaximumImageCalculatorFilter->SetImage(fftfilter->GetOutput());
+      minimumMaximumImageCalculatorFilter->Compute();
+      itk::Index<2> maximumCorrelationPatchCenter = minimumMaximumImageCalculatorFilter->GetIndexOfMaximum();
+      itk::Size<2> outputSize = fftfilter->GetOutput()->GetLargestPossibleRegion().GetSize();
+
+      itk::Index<2> maximumCorrelationPatchCenterFixed;
+      maximumCorrelationPatchCenterFixed[0] = outputSize[0] / 2 - maximumCorrelationPatchCenter[0];
+      maximumCorrelationPatchCenterFixed[1] = outputSize[1] / 2 - maximumCorrelationPatchCenter[1];
+      TransformType::InputVectorType translation; 
+
+      translation[0] = maximumCorrelationPatchCenterFixed[0];
+      translation[1] = maximumCorrelationPatchCenterFixed[1];
+
+      transform->SetTranslation(translation);
+    }
+
+
 		transformInitializer->SetTransform(transform);
 		transformInitializer->GeometryOn();
 		transformInitializer->SetFixedImage(itkFixedImage);
@@ -592,19 +696,49 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 	{
 		typedef itk::AffineTransform<double, ImageDimension> TransformType; 
 		TransformType::Pointer transform = TransformType::New();
+    typedef itk::CenteredTransformInitializer<TransformType, ImageType, ImageType> TranformInitializerType;
+    TranformInitializerType::Pointer transformInitializer = TranformInitializerType::New();
 
-		TransformType::ParametersType initialParameters(transform->GetNumberOfParameters()); 
-		initialParameters[0] = 0; 
-		initialParameters[1] = 0;
+    if (m_InitializeAffineWithFFT)
+    {
+      typedef itk::Image<float, 2> FloatImageType;
+      typedef itk::FFTNormalizedCorrelationImageFilter<ImageType, FloatImageType> FFTNXcorrType;
+      FFTNXcorrType::Pointer fftfilter = FFTNXcorrType::New();
+      fftfilter->SetFixedImage(itkFixedImage);
+      fftfilter->SetMovingImage(itkMovingImage);
+      fftfilter->SetRequiredFractionOfOverlappingPixels(0.5);
+      fftfilter->Update();
+
+      using MinimumMaximumImageCalculatorType = itk::MinimumMaximumImageCalculator<FloatImageType>;
+      MinimumMaximumImageCalculatorType::Pointer minimumMaximumImageCalculatorFilter = MinimumMaximumImageCalculatorType::New();
+      minimumMaximumImageCalculatorFilter->SetImage(fftfilter->GetOutput());
+      minimumMaximumImageCalculatorFilter->Compute();
+      itk::Index<2> maximumCorrelationPatchCenter = minimumMaximumImageCalculatorFilter->GetIndexOfMaximum();
+      itk::Size<2> outputSize = fftfilter->GetOutput()->GetLargestPossibleRegion().GetSize();
+
+      itk::Index<2> maximumCorrelationPatchCenterFixed;
+      maximumCorrelationPatchCenterFixed[0] = outputSize[0] / 2 - maximumCorrelationPatchCenter[0];
+      maximumCorrelationPatchCenterFixed[1] = outputSize[1] / 2 - maximumCorrelationPatchCenter[1];
+      TransformType::InputVectorType translation;
+
+      translation[0] = maximumCorrelationPatchCenterFixed[0];
+      translation[1] = maximumCorrelationPatchCenterFixed[1];
+
+      transform->SetTranslation(translation);
+    }
+    
 
 
+    transformInitializer->SetTransform(transform);
+    transformInitializer->GeometryOn();
+    transformInitializer->SetFixedImage(itkFixedImage);
+    transformInitializer->SetMovingImage(itkMovingImage);
+    transformInitializer->GeometryOn();
+    transformInitializer->InitializeTransform();
 
-		
+    registration->SetInitialTransform(transform);
+   
 	}
-
-
-
-
 
 
 
@@ -685,64 +819,14 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 
 	movingGeometry->setTransformContainer(transformContainer);
 
-	///////////////COMMENT OUT BELOW///////////////////////////
-	//typedef itk::ResampleImageFilter<ImageType, ImageType> ResampleFilterType;
-	//ResampleFilterType::Pointer resample = ResampleFilterType::New();
-	//resample->SetTransform(registration->GetTransform()); 
-	//resample->SetInput(itkMovingImage);
-
-
-	//ImageType::SizeType fixedsize = itkFixedImage->GetLargestPossibleRegion().GetSize();
-	//ImageType::PointType fixedorigin = itkFixedImage->GetOrigin();
-	//ImageType::SpacingType fixedspacing = itkFixedImage->GetSpacing();
-	//ImageType::DirectionType fixeddirection = itkFixedImage->GetDirection();
-
-	//resample->SetSize(itkFixedImage->GetLargestPossibleRegion().GetSize());
-	//resample->SetOutputOrigin(itkFixedImage->GetOrigin());
-	//resample->SetOutputSpacing(itkFixedImage->GetSpacing());
-	//resample->SetOutputDirection(itkFixedImage->GetDirection());
-	//resample->SetDefaultPixelValue(0);
-	//resample->GetOutput();
-
-	//std::vector<double> dummy(72);
-	//for (int i = 0; i < 72; i++)
-	//{
-	//	dummy[i] = resample->GetTransform()->GetParameters().GetElement(i);
-	//}
-
-	//std::vector<double> dummyfixed(10);
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	dummyfixed[i] = resample->GetTransform()->GetFixedParameters().GetElement(i);
-	//}
-
-
-	//typedef unsigned char OutputPixelType;
-
-	//typedef itk::Image<OutputPixelType, ImageDimension> OutputImageType;
-
-	//typedef itk::CastImageFilter<ImageType, OutputImageType> CastFilterType;
-
-	//typedef itk::ImageFileWriter<OutputImageType> OutputWriterType;
-
-	//OutputWriterType::Pointer writer = OutputWriterType::New();
-	//CastFilterType::Pointer caster = CastFilterType::New();
-
-	//writer->SetFileName("C:/Users/shahmn/Documents/test.png");
-
-	//caster->SetInput(resample->GetOutput());
-	//writer->SetInput(caster->GetOutput());
-
-	//writer->Update();
-
-	//////////////////////////////
-
 	
 	std::string groupName = std::to_string(sliceNo);
 	transformContainer->writeTransformContainerToHDF5(fileID, groupName);
 	writeFixedImageInfo2DtoHDF5(fileID, sliceNo, itkFixedImage);	
 }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void ITKPairwiseImageRegistration::SinglePairRegistration()
 {
 	EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, convertToDouble, m_FixedImagePtr.lock(), m_FixedImagePtr, m_FixedImageArrayPath, "_INTERNAL_USE_ONLY_FixedImageDouble", getDataContainerArray());
@@ -751,7 +835,9 @@ void ITKPairwiseImageRegistration::SinglePairRegistration()
 	registerImagePair2D(getDataContainerArray(), 0, fileId);
 	H5Utilities::closeFile(fileId);
 }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 int ITKPairwiseImageRegistration::writeFixedImageInfo2DtoHDF5(hid_t parentId, size_t sliceNo, itk::Dream3DImage<double, 2>::Pointer itkFixedImage)
 {	
 	typedef itk::Dream3DImage<double, 2> ImageType;
@@ -813,7 +899,9 @@ int ITKPairwiseImageRegistration::writeFixedImageInfo2DtoHDF5(hid_t parentId, si
 	return 0;
 }
 
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 
 void ITKPairwiseImageRegistration::SeriesPairRegistration()
 {
@@ -906,26 +994,14 @@ void ITKPairwiseImageRegistration::SeriesPairRegistration()
 			return;
 		}
 
-
 		EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, convertToDouble, m_FixedImagePtr.lock(), m_FixedImagePtr, m_FixedImageArrayPath, "_INTERNAL_USE_ONLY_FixedImageDouble", dca);
 		EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, convertToDouble, m_MovingImagePtr.lock(), m_MovingImagePtr, m_MovingImageArrayPath, "_INTERNAL_USE_ONLY_MovingImageDouble", dca);
 		
 		registerImagePair2D(dca, i, fileId);
-		
-
-
+	
 	}
 
 	H5Utilities::closeFile(fileId);
-
-	
-
-
-	
-
-
-
-
 }
 
 

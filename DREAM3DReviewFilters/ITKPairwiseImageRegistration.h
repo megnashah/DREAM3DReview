@@ -33,6 +33,14 @@ class DREAM3DReview_EXPORT ITKPairwiseImageRegistration : public AbstractFilter
 		PYB11_PROPERTY(FileListInfo_t MovingFileListInfo READ getMovingFileListInfo WRITE setMovingFileListInfo)
 		PYB11_PROPERTY(FileListInfo_t FixedFileListInfo READ getFixedFileListInfo WRITE setFixedFileListInfo)
 		PYB11_PROPERTY(QString TransformFile READ getTransformFile WRITE setTransformFile)
+    PYB11_PROPERTY(bool ChangeOriginResolution READ getChangeOriginResolution WRITE setChangeOriginResolution)
+    PYB11_PROPERTY(FloatVec3Type MovingOrigin READ getMovingOrigin WRITE setMovingOrigin)
+    PYB11_PROPERTY(FloatVec3Type MovingSpacing READ getMovingSpacing WRITE setMovingSpacing)
+    PYB11_PROPERTY(FloatVec3Type FixedOrigin READ getFixedOrigin WRITE setFixedOrigin)
+    PYB11_PROPERTY(FloatVec3Type FixedSpacing READ getFixedSpacing WRITE setFixedSpacing)
+    PYB11_PROPERTY(bool InitializeRigidWithFFT READ getInitializeRigidWithFFT WRITE setInitializeRigidWithFFT)
+    PYB11_PROPERTY(bool InitializeAffineWithFFT READ getInitializeAffineWithFFT WRITE setInitializeAffineWithFFT)
+
 
 		// clang-format on
 
@@ -42,6 +50,27 @@ public:
 		SIMPL_TYPE_MACRO_SUPER(ITKPairwiseImageRegistration, AbstractFilter)
 
 		~ITKPairwiseImageRegistration() override;
+
+    SIMPL_FILTER_PARAMETER(bool, ChangeOriginResolution)
+    Q_PROPERTY(bool ChangeOriginResolution READ getChangeOriginResolution WRITE setChangeOriginResolution)
+
+    SIMPL_FILTER_PARAMETER(bool, InitializeRigidWithFFT)
+    Q_PROPERTY(bool InitializeRigidWithFFT READ getInitializeRigidWithFFT WRITE setInitializeRigidWithFFT)
+
+    SIMPL_FILTER_PARAMETER(bool, InitializeAffineWithFFT)
+    Q_PROPERTY(bool InitializeAffineWithFFT READ getInitializeAffineWithFFT WRITE setInitializeAffineWithFFT)
+
+    SIMPL_FILTER_PARAMETER(FloatVec3Type, MovingOrigin)
+    Q_PROPERTY(FloatVec3Type MovingOrigin READ getMovingOrigin WRITE setMovingOrigin)
+
+    SIMPL_FILTER_PARAMETER(FloatVec3Type, MovingSpacing)
+    Q_PROPERTY(FloatVec3Type MovingSpacing READ getMovingSpacing WRITE setMovingSpacing)
+
+    SIMPL_FILTER_PARAMETER(FloatVec3Type, FixedOrigin)
+    Q_PROPERTY(FloatVec3Type FixedOrigin READ getFixedOrigin WRITE setFixedOrigin)
+
+    SIMPL_FILTER_PARAMETER(FloatVec3Type, FixedSpacing)
+    Q_PROPERTY(FloatVec3Type FixedSpacing READ getFixedSpacing WRITE setFixedSpacing)
 
 		SIMPL_FILTER_PARAMETER(QString, TransformFile)
 		Q_PROPERTY(QString TransformFile READ getTransformFile WRITE setTransformFile)

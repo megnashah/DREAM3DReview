@@ -183,7 +183,7 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
 	  DEFINE_IDATAARRAY_VARIABLE(MovingImage)
 	  DEFINE_IDATAARRAY_VARIABLE(FinalImage)
 
-	  template <typename T> void Resample2D();
+	  template <typename T> void Resample2D(QString sliceNo);
 	  ITKTransformHelpers getTransformAndFixedParams(QString sliceNo);
 	  template <typename T> void createCompatibleArrays();
 	  int32_t checkInputFileList(FileListInfo_t inputFileListInfo);

@@ -64,6 +64,9 @@ enum createdPathID : RenameDataPath::DataID_t
 ITKResampleImage::ITKResampleImage() 
 :  m_TransformFileName("")
 ,  m_InterpolationType(0)
+, m_MovingImageArrayPath("", "", "")
+, m_FileNamePrefix("")
+, m_EBSDFileNamePrefix("")
 , m_DataContainerName("ResampledDataDC", "", "")
 , m_CellAttributeMatrixName("ResampledDataAM")
 , m_ImageDataArrayName("ResampledData")
@@ -241,85 +244,85 @@ int32_t ITKResampleImage::checkInputFileList(FileListInfo_t inputFileListInfo)
 
 	// Now generate all the file names the user is asking for and populate the table
 	const QVector<QString> fileList = this->getFileList(inputFileListInfo);
-	//if (fileList.empty())
-	//{
-	//	ss.clear();
-	//	QTextStream out(&ss);
-	//	out << " No files have been selected for import. Have you set the input directory and other values so that input files will be generated?\n";
-	//	out << "InputPath: " << inputFileListInfo.InputPath << "\n";
-	//	out << "FilePrefix: " << inputFileListInfo.FilePrefix << "\n";
-	//	out << "FileSuffix: " << inputFileListInfo.FileSuffix << "\n";
-	//	out << "FileExtension: " << inputFileListInfo.FileExtension << "\n";
-	//	out << "PaddingDigits: " << inputFileListInfo.PaddingDigits << "\n";
-	//	out << "StartIndex: " << inputFileListInfo.StartIndex << "\n";
-	//	out << "EndIndex: " << inputFileListInfo.EndIndex << "\n";
-	//	setErrorCondition(-64501, ss);
-	//	return -1;
-	//}
+	if (fileList.empty())
+	{
+		ss.clear();
+		QTextStream out(&ss);
+		out << " No files have been selected for import. Have you set the input directory and other values so that input files will be generated?\n";
+		out << "InputPath: " << inputFileListInfo.InputPath << "\n";
+		out << "FilePrefix: " << inputFileListInfo.FilePrefix << "\n";
+		out << "FileSuffix: " << inputFileListInfo.FileSuffix << "\n";
+		out << "FileExtension: " << inputFileListInfo.FileExtension << "\n";
+		out << "PaddingDigits: " << inputFileListInfo.PaddingDigits << "\n";
+		out << "StartIndex: " << inputFileListInfo.StartIndex << "\n";
+		out << "EndIndex: " << inputFileListInfo.EndIndex << "\n";
+		setErrorCondition(-64501, ss);
+		return -1;
+	}
 
-	//// Validate all the files in the list. Throw an error for each one if it does not exist
-	//for (const auto& filePath : fileList)
-	//{
-	//	QFileInfo fi(filePath);
-	//	if (!fi.exists())
-	//	{
-	//		QString errorMessage = QString("File does not exist: %1").arg(filePath);
-	//		setErrorCondition(-64502, errorMessage);
-	//	}
-	//}
-	//if (getErrorCode() < 0)
-	//{
-	//	return -1;
-	//}
+	// Validate all the files in the list. Throw an error for each one if it does not exist
+	for (const auto& filePath : fileList)
+	{
+		QFileInfo fi(filePath);
+		if (!fi.exists())
+		{
+			QString errorMessage = QString("File does not exist: %1").arg(filePath);
+			setErrorCondition(-64502, errorMessage);
+		}
+	}
+	if (getErrorCode() < 0)
+	{
+		return -1;
+	}
 
 
 
-	//// Create a subfilter to read each image, although for preflight we are going to read the first image in the
-	//// list and hope the rest are correct.
-	//if (m_OperationMode == 1) ///////FOR IMAGE DATA
-	//{
-	//	FilterManager* fm = FilterManager::Instance();
-	//	IFilterFactory::Pointer factory = fm->getFactoryFromClassName("ITKImageReader");
-	//	if (factory.get() == nullptr)
-	//	{
-	//		QString ss = QObject::tr("Unable to instantiate Filter with name 'ITKImageReader'\n"
-	//			"The 'ITKImageReader' Filter is needed to import the image");
-	//		setErrorCondition(-1, ss);
-	//	}
-	//	AbstractFilter::Pointer itkImageReader = factory->create();
-	//	DataContainerArray::Pointer dca = DataContainerArray::New();
-	//	itkImageReader->setDataContainerArray(dca);
-	//	QVariant var;
-	//	var.setValue(fileList[0]);
-	//	itkImageReader->setProperty("FileName", var);
-	//	itkImageReader->preflight();
-	//	if (itkImageReader->getErrorCode() < 0)
-	//	{
-	//		setErrorCondition(itkImageReader->getErrorCode(), "Error Reading Input Image.");
-	//		return -1;
-	//	}
-	//}
+	// Create a subfilter to read each image, although for preflight we are going to read the first image in the
+	// list and hope the rest are correct.
+	if (m_OperationMode == 1) ///////FOR IMAGE DATA
+	{
+		FilterManager* fm = FilterManager::Instance();
+		IFilterFactory::Pointer factory = fm->getFactoryFromClassName("ITKImageReader");
+		if (factory.get() == nullptr)
+		{
+			QString ss = QObject::tr("Unable to instantiate Filter with name 'ITKImageReader'\n"
+				"The 'ITKImageReader' Filter is needed to import the image");
+			setErrorCondition(-1, ss);
+		}
+		AbstractFilter::Pointer itkImageReader = factory->create();
+		DataContainerArray::Pointer dca = DataContainerArray::New();
+		itkImageReader->setDataContainerArray(dca);
+		QVariant var;
+		var.setValue(fileList[0]);
+		itkImageReader->setProperty("FileName", var);
+		itkImageReader->preflight();
+		if (itkImageReader->getErrorCode() < 0)
+		{
+			setErrorCondition(itkImageReader->getErrorCode(), "Error Reading Input Image.");
+			return -1;
+		}
+	}
 
-	//if (m_OperationMode == 2) ////////// FOR ORIENATION DATA
-	//{
-	//	// Based on the type of file (.ang or .ctf) get the list of arrays that would be created
-	//	QFileInfo fi(fileList.front());
-	//	QString ext = fi.suffix();
-	//	if (ext.compare("ang") == 0)
-	//	{
-	//		// ebsdFeatures = new AngFields;
-	//	}
-	//	else if (ext.compare("ctf") == 0)
-	//	{
-	//		// ebsdFeatures = new CtfFields;
-	//	}
-	//	else
-	//	{
-	//		ss = QObject::tr("The file extension '%1' was not recognized. Currently .ang or .ctf are the only recognized file extensions").arg(ext);
-	//		setErrorCondition(-997, ss);
-	//		return -1;
-	//	}
-	//}
+	if (m_OperationMode == 2) ////////// FOR ORIENATION DATA
+	{
+		// Based on the type of file (.ang or .ctf) get the list of arrays that would be created
+		QFileInfo fi(fileList.front());
+		QString ext = fi.suffix();
+		if (ext.compare("ang") == 0)
+		{
+			// ebsdFeatures = new AngFields;
+		}
+		else if (ext.compare("ctf") == 0)
+		{
+			// ebsdFeatures = new CtfFields;
+		}
+		else
+		{
+			ss = QObject::tr("The file extension '%1' was not recognized. Currently .ang or .ctf are the only recognized file extensions").arg(ext);
+			setErrorCondition(-997, ss);
+			return -1;
+		}
+	}
 
 	return fileList.size();
 
@@ -413,7 +416,9 @@ void ITKResampleImage::preflight()
   emit preflightExecuted(); // We are done preflighting this filter
   setInPreflight(false); // Inform the system this filter is NOT in preflight mode anymore.
 }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 template <typename T> void ITKResampleImage::createCompatibleArrays()
 {
 	
@@ -424,6 +429,115 @@ template <typename T> void ITKResampleImage::createCompatibleArrays()
 	m_FinalImagePtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<T>, AbstractFilter, T>(this, path, 0, m_MovingImagePtr.lock()->getComponentDimensions());
 	
 }
+
+// -----------------------------------------------------------------------------
+// BEGIN MACROS
+// -----------------------------------------------------------------------------
+
+#define RESAMPLE2D_VARIABLECOMPONENT(sliceNo)\
+typedef itk::InPlaceDream3DDataToImageFilter<PixelType, ImageDimension> ToITKType; \
+ToITKType::Pointer movingtoITK = ToITKType::New();\
+movingtoITK->SetDataArrayName(m_MovingImageArrayPath.getDataArrayName().toStdString());\
+movingtoITK->SetAttributeMatrixArrayName(m_MovingImageArrayPath.getAttributeMatrixName().toStdString());\
+movingtoITK->SetInput(getDataContainerArray()->getDataContainer(m_MovingImageArrayPath.getDataContainerName()));\
+movingtoITK->InPlaceOn();\
+movingtoITK->Update();\
+typedef itk::Dream3DImage<PixelType, ImageDimension> ImageType;\
+ImageType::Pointer itkMovingImage = movingtoITK->GetOutput();\
+typedef itk::ResampleImageFilter<ImageType, ImageType> ResampleFilterType;\
+ResampleFilterType::Pointer resample = ResampleFilterType::New();\
+ITKTransformHelpers transformhelper = getTransformAndFixedParams(sliceNo);\
+TransformContainer::Pointer d3dtransform = transformhelper.transform;\
+d3dtransform->getFixedParameters();\
+QString stringTransformType = QString::fromStdString(d3dtransform->getTransformTypeAsString()).split("_")[0];\
+if (stringTransformType == "BSplineTransform")\
+{\
+  QString transformOrderString = QString::fromStdString(d3dtransform->getTransformTypeAsString());\
+  if (transformOrderString == "BSplineTransform_double_2_2")\
+  {\
+    const unsigned int SplineOrder = 3;\
+    BSPLINESETUP()\
+  }\
+  if (transformOrderString == "BSplineTransform_double_2_2_2")\
+  {\
+    const unsigned int SplineOrder = 2;\
+    BSPLINESETUP()\
+  }\
+  if (transformOrderString == "BSplineTransform_double_2_2_1")\
+  {\
+    const unsigned int SplineOrder = 1;\
+    BSPLINESETUP()\
+  }\
+}\
+if (stringTransformType == "Affine")\
+{\
+  typedef itk::AffineTransform<double, ImageDimension> TransformType;\
+  TransformType::Pointer transform = TransformType::New();\
+  int32_t numFixedElements = d3dtransform->getFixedParameters().size();\
+  TransformType::FixedParametersType fixedParameters(numFixedElements);\
+  for (int32_t i = 0; i < numFixedElements; i++)\
+  {\
+    fixedParameters.SetElement(i, d3dtransform->getFixedParameters()[i]);\
+  }\
+  transform->SetFixedParameters(fixedParameters);\
+  int32_t numLearnedElements = d3dtransform->getParameters().size();\
+  TransformType::ParametersType learnedParameters(numLearnedElements);\
+  for (int32_t i = 0; i < numLearnedElements; i++)\
+  {\
+    learnedParameters.SetElement(i, d3dtransform->getParameters()[i]);\
+  }\
+  transform->SetParameters(learnedParameters);\
+  resample->SetTransform(transform);\
+}\
+if (stringTransformType == "Euler2DTransform")\
+{\
+  typedef itk::Euler2DTransform<double> TransformType;\
+  TransformType::Pointer transform = TransformType::New();\
+  int32_t numFixedElements = d3dtransform->getFixedParameters().size();\
+  TransformType::FixedParametersType fixedParameters(numFixedElements);\
+  for (int32_t i = 0; i < numFixedElements; i++)\
+  {\
+    fixedParameters.SetElement(i, d3dtransform->getFixedParameters()[i]);\
+  }\
+  transform->SetFixedParameters(fixedParameters);\
+  int32_t numLearnedElements = d3dtransform->getParameters().size();\
+  TransformType::ParametersType learnedParameters(numLearnedElements);\
+  for (int32_t i = 0; i < numLearnedElements; i++)\
+  {\
+    learnedParameters.SetElement(i, d3dtransform->getParameters()[i]);\
+  }\
+  transform->SetParameters(learnedParameters);\
+  resample->SetTransform(transform);\
+}\
+resample->SetInput(itkMovingImage);\
+resample->SetSize(transformhelper.FixedSize);\
+resample->SetOutputOrigin(transformhelper.FixedOrigin);\
+resample->SetOutputSpacing(transformhelper.FixedSpacing);\
+resample->SetOutputDirection(transformhelper.FixedDirection);\
+if (m_InterpolationType == 1)\
+{\
+  typedef itk::NearestNeighborInterpolateImageFunction<ImageType, double> InterpolatorType;\
+  InterpolatorType::Pointer interpolator = InterpolatorType::New();\
+  resample->SetInterpolator(interpolator);\
+}\
+resample->Update();\
+ImageType::Pointer output = resample->GetOutput();\
+ImageType::SizeType size = output->GetLargestPossibleRegion().GetSize();\
+typedef itk::InPlaceImageToDream3DDataFilter<PixelType, ImageDimension> ToD3DType;\
+ToD3DType::Pointer movedD3D = ToD3DType::New();\
+DataContainer::Pointer dc = getDataContainerArray()->getDataContainer(getDataContainerName());\
+AttributeMatrix::Pointer am = dc->getAttributeMatrix(m_CellAttributeMatrixName);\
+QVector<size_t> tdims(3, 0);\
+tdims[0] = size[0];\
+tdims[1] = size[1];\
+tdims[2] = 1;\
+am->setTupleDimensions(tdims);\
+movedD3D->SetDataContainer(dc);\
+movedD3D->SetDataArrayName(m_ImageDataArrayName.toStdString());\
+movedD3D->SetAttributeMatrixArrayName(m_CellAttributeMatrixName.toStdString());\
+movedD3D->InPlaceOn();\
+movedD3D->SetInput(output);\
+movedD3D->Update();
 
 
 #define BSPLINESETUP()\
@@ -448,79 +562,12 @@ for (int32_t i = 0; i < numLearnedElements; i++)\
 transform->SetParameters(learnedParameters);\
 resample->SetTransform(transform);
 
+// -----------------------------------------------------------------------------
+// END MACROS
+// -----------------------------------------------------------------------------
 
-#define RESAMPLE2D_VARIABLECOMPONENT()\
-typedef itk::InPlaceDream3DDataToImageFilter<PixelType, ImageDimension> ToITKType;\
-ToITKType::Pointer movingtoITK = ToITKType::New();\
-movingtoITK->SetDataArrayName(m_MovingImageArrayPath.getDataArrayName().toStdString());\
-movingtoITK->SetAttributeMatrixArrayName(m_MovingImageArrayPath.getAttributeMatrixName().toStdString());\
-movingtoITK->SetInput(getDataContainerArray()->getDataContainer(m_MovingImageArrayPath.getDataContainerName()));\
-movingtoITK->InPlaceOn();\
-movingtoITK->Update();\
-typedef itk::Dream3DImage<PixelType, ImageDimension> ImageType;\
-ImageType::Pointer itkMovingImage = movingtoITK->GetOutput();\
-typedef itk::ResampleImageFilter<ImageType, ImageType> ResampleFilterType;\
-ResampleFilterType::Pointer resample = ResampleFilterType::New();\
-ITKTransformHelpers transformhelper = getTransformAndFixedParams("0");\
-TransformContainer::Pointer d3dtransform = transformhelper.transform;\
-d3dtransform->getFixedParameters();\
-QString stringTransformType = QString::fromStdString(d3dtransform->getTransformTypeAsString()).split("_")[0];\
-if (stringTransformType == "BSplineTransform")\
-{\
-	QString transformOrderString = QString::fromStdString(d3dtransform->getTransformTypeAsString());\
-	if (transformOrderString == "BSplineTransform_double_2_2")\
-	{\
-		const unsigned int SplineOrder = 3;\
-		BSPLINESETUP()\
-	}\
-	if (transformOrderString == "BSplineTransform_double_2_2_2")\
-	{\
-		const unsigned int SplineOrder = 2;\
-		BSPLINESETUP()\
-	}\
-	if (transformOrderString == "BSplineTransform_double_2_2_1")\
-	{\
-		const unsigned int SplineOrder = 1;\
-		BSPLINESETUP()\
-	}\
-	resample->SetInput(itkMovingImage);\
-	resample->SetSize(transformhelper.FixedSize);\
-	resample->SetOutputOrigin(transformhelper.FixedOrigin);\
-	resample->SetOutputSpacing(transformhelper.FixedSpacing);\
-	resample->SetOutputDirection(transformhelper.FixedDirection);\
-	if (m_InterpolationType == 1)\
-	{\
-		typedef itk::NearestNeighborInterpolateImageFunction<ImageType, double> InterpolatorType;\
-		InterpolatorType::Pointer interpolator = InterpolatorType::New();\
-		resample->SetInterpolator(interpolator);\
-	}\
-	resample->Update();\
-	ImageType::Pointer output = resample->GetOutput();\
-	ImageType::SizeType size = output->GetLargestPossibleRegion().GetSize();\
-	typedef itk::InPlaceImageToDream3DDataFilter<PixelType, ImageDimension> ToD3DType;\
-	ToD3DType::Pointer movedD3D = ToD3DType::New();\
-	DataContainer::Pointer dc = getDataContainerArray()->getDataContainer(getDataContainerName());\
-	AttributeMatrix::Pointer am = dc->getAttributeMatrix(m_CellAttributeMatrixName);\
-	QVector<size_t> tdims(3, 0);\
-	tdims[0] = size[0];\
-	tdims[1] = size[1];\
-	tdims[2] = 1;\
-	am->setTupleDimensions(tdims);\
-	movedD3D->SetDataContainer(dc);\
-	movedD3D->SetDataArrayName(m_ImageDataArrayName.toStdString());\
-	movedD3D->SetAttributeMatrixArrayName(m_CellAttributeMatrixName.toStdString());\
-	movedD3D->InPlaceOn();\
-	movedD3D->SetInput(output);\
-	movedD3D->Update();\
-}\
-if (stringTransformType == "Affine")\
-{\
-}\
-if (stringTransformType == "Euler2DTransform_double_2_2")\
-{\
-}
 
-template <typename T> void ITKResampleImage::Resample2D()
+template <typename T> void ITKResampleImage::Resample2D(QString sliceNo)
 {
 	const unsigned int ImageDimension = 2;
 	const unsigned int SpaceDimension = 2;
@@ -529,41 +576,42 @@ template <typename T> void ITKResampleImage::Resample2D()
 	if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 1)
 	{
 		using PixelType = itk::Vector<T, 1>;
-		RESAMPLE2D_VARIABLECOMPONENT()
+
+
+		//RESAMPLE2D_VARIABLECOMPONENT()
 	}
 	else if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 2)
 	{
 		using PixelType = itk::Vector<T, 2>;
-		RESAMPLE2D_VARIABLECOMPONENT()
+		RESAMPLE2D_VARIABLECOMPONENT(sliceNo)
 	}
 
 	else if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 3)
 	{
 		using PixelType = itk::Vector<T, 3>;
-		RESAMPLE2D_VARIABLECOMPONENT()
+		RESAMPLE2D_VARIABLECOMPONENT(sliceNo)
 	}
 
 	else if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 4)
 	{
 		using PixelType = itk::Vector<T, 4>;
-		RESAMPLE2D_VARIABLECOMPONENT()
+		RESAMPLE2D_VARIABLECOMPONENT(sliceNo)
 	}
 	else if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 10)
 	{
 		using PixelType = itk::Vector<T, 10>;
-		RESAMPLE2D_VARIABLECOMPONENT()
+		RESAMPLE2D_VARIABLECOMPONENT(sliceNo)
 	}
 	else if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 11)
 	{
 		using PixelType = itk::Vector<T, 11>;
-		RESAMPLE2D_VARIABLECOMPONENT()
+		RESAMPLE2D_VARIABLECOMPONENT(sliceNo)
 	}
 
 }
-
-
-
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 
 ITKTransformHelpers ITKResampleImage::getTransformAndFixedParams(QString sliceNo)
 {
@@ -575,7 +623,9 @@ ITKTransformHelpers ITKResampleImage::getTransformAndFixedParams(QString sliceNo
 	return transformhelper;
 }
 
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void ITKResampleImage::SeriesResampling()
 {
 	QVector<QString> inputImageList = getFileList(m_ImageFileListInfo);
@@ -656,7 +706,7 @@ void ITKResampleImage::SeriesResampling()
 		EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, createCompatibleArrays, m_MovingImagePtr.lock())
 
 
-		EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock())
+		EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock(), QString::number(i))
 
 		itkImageWriter->setDataContainerArray(getDataContainerArray()); 
 		
@@ -680,7 +730,9 @@ void ITKResampleImage::SeriesResampling()
 		getDataContainerArray()->removeDataContainer(m_DataContainerName.getDataContainerName());
 	}
 }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 QString ITKResampleImage::GetAndModifyHeader(QFile& reader, SizeVec3Type dims, FloatVec3Type spacing)
 {
 	QString ctfheader("");
@@ -753,7 +805,9 @@ QString ITKResampleImage::GetAndModifyHeader(QFile& reader, SizeVec3Type dims, F
 
 	return ctfheader;
 }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void ITKResampleImage::WriteResampledCTFfile(QString filename, std::vector<IDataArray::Pointer> ctfArrays, SizeVec3Type dims, FloatVec3Type spacing, size_t index)
 {
 	QFile in(filename);
@@ -804,7 +858,9 @@ void ITKResampleImage::WriteResampledCTFfile(QString filename, std::vector<IData
 	
 	
 }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void ITKResampleImage::EBSDSeriesResampling()
 {
 	QVector<QString> inputEBSDFileList = getFileList(m_OrientationFileListInfo);
@@ -886,7 +942,7 @@ void ITKResampleImage::EBSDSeriesResampling()
 
 			m_MovingImagePtr = getDataContainerArray()->getPrereqIDataArrayFromPath<IDataArray, AbstractFilter>(this, getMovingImageArrayPath()); /* Assigns the shared_ptr<> to an instance variable that is a weak_ptr<> */
 			EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, createCompatibleArrays, m_MovingImagePtr.lock())
-			EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock())
+			EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock(), QString::number(i))
 
 			finalImage = getDataContainerArray()->getDataContainer(m_DataContainerName)->getGeometryAs<ImageGeom>();
 			dims = finalImage->getDimensions();
@@ -924,13 +980,6 @@ void ITKResampleImage::EBSDSeriesResampling()
 					}
 				}
 			}
-
-
-
-
-
-
-
 			//This is a vector of all the arrays stored from reading in the CTF file
 			ctfArrays[j] = getDataContainerArray()->getDataContainer(m_DataContainerName)->getAttributeMatrix(m_CellAttributeMatrixName)->getAttributeArray(m_ImageDataArrayName)->deepCopy();
 			
@@ -946,14 +995,7 @@ void ITKResampleImage::EBSDSeriesResampling()
 
 	}
 
-
-
-
-
-
 }
-
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -981,7 +1023,7 @@ void ITKResampleImage::execute()
   if (m_OperationMode == 0)
   {
 	  m_MovingImagePtr = getDataContainerArray()->getPrereqIDataArrayFromPath<IDataArray, AbstractFilter>(this, getMovingImageArrayPath()); /* Assigns the shared_ptr<> to an instance variable that is a weak_ptr<> */
-	  EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock())
+    EXECUTE_FUNCTION_TEMPLATE_NO_BOOL(this, Resample2D, m_MovingImagePtr.lock(), "0")
   }
   else if (m_OperationMode == 1)
   {

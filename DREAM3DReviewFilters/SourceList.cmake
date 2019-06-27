@@ -32,7 +32,7 @@ set(_PublicFilters
   PrincipalComponentAnalysis
   RemoveFlaggedVertices
   RobustAutomaticThreshold
-  Silhouette
+  FindMaskNeighbors
 
   # 2019-03-06 Filter AFRL Filter Release
   AlignGeometries
@@ -78,6 +78,8 @@ set(_PublicFilters
   FindCSLBoundaries
   InsertTransformationPhases
   TiDwellFatigueCrystallographicAnalysis
+
+  #ImageRegistration
   ITKPairwiseImageRegistration
   ITKResampleImage
 )
