@@ -190,7 +190,7 @@ void NormalizeArrays::dataCheck()
     return;
   }
 
-  QVector<size_t> cDims(1, 1);
+  std::vector<size_t> cDims(1, 1);
   QString dcName = paths[0].getDataContainerName();
   QString amName = paths[0].getAttributeMatrixName();
 

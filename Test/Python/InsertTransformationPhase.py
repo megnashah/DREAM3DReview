@@ -9,7 +9,7 @@ from dream3d import orientationanalysispy
 from dream3d import genericpy
 from dream3d import statisticspy
 from dream3d import syntheticbuildingpy as syntheticbuilding
-from dream3d import transformationphasepy
+from dream3d import dream3dreviewpy
 
 
 def insert_transformation_phase():
@@ -133,7 +133,7 @@ def insert_transformation_phase():
     # Possible candidate for a helper function
     # Possible enums: trans_crystal_struct
     # May want to use a "dictionary" for the numerical portion in helper function
-    err = transformationphasepy.insert_transformation_phases(dca,
+    err = dream3dreviewpy.insert_transformation_phases(dca,
                                                              1, 1, 60, simpl.FloatVec3Type([1, 1, 1]), True, True, 1, 0.2, 1,
                                                              0,
                                                              simpl.DataArrayPath("StatsGeneratorDataContainer",

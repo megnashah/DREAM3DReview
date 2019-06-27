@@ -37,7 +37,6 @@
 #pragma once
 
 #include <QtCore/QString>
-#include <QtCore/QVector>
 
 #define DECLARE_STRING_CONST(var) const QString var(#var);
 

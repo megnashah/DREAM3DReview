@@ -175,7 +175,7 @@ void ApplyTransformationToGeometry::dataCheck()
     setErrorCondition(-702, ss);
   }
 
-  QVector<size_t> cDims = {4, 4};
+  std::vector<size_t> cDims = {4, 4};
 
   switch(getTransformationMatrixType())
   {

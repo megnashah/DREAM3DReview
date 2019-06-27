@@ -223,7 +223,7 @@ void DBSCAN::dataCheck()
   }
   }
 
-  QVector<size_t> tDims(1, 0);
+  std::vector<size_t> tDims(1, 0);
   m->createNonPrereqAttributeMatrix(this, getFeatureAttributeMatrixName(), tDims, destAttrMatType, AttributeMatrixID21);
 
   if(getEpsilon() <= 0)
@@ -237,7 +237,7 @@ void DBSCAN::dataCheck()
     return;
   }
 
-  QVector<size_t> cDims(1, 1);
+  std::vector<size_t> cDims(1, 1);
   QVector<DataArrayPath> dataArrayPaths;
 
   m_InDataPtr =
@@ -323,7 +323,7 @@ void DBSCAN::execute()
     }
   }
 
-  QVector<size_t> tDims(1, maxCluster + 1);
+  std::vector<size_t> tDims(1, maxCluster + 1);
   featAttrMat->resizeAttributeArrays(tDims);
 
 }
