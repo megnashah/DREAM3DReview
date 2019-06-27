@@ -46,6 +46,9 @@
 #include <tbb/task_scheduler_init.h>
 #endif
 
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 
 #include "SIMPLib/Common/Constants.h"
 #include "SIMPLib/CoreFilters/DataContainerWriter.h"
@@ -470,7 +473,7 @@ void TesselateFarFieldGrains::dataCheck()
 
   // Input Ensemble Data That we require
 
-  std::vector<size_t> dims(1, 1);
+  QVector<size_t> dims(1, 1);
   m_MaskPtr = getDataContainerArray()->getPrereqArrayFromPath<DataArray<bool>, AbstractFilter>(this, getMaskArrayPath(), dims);
   if(nullptr != m_MaskPtr.lock()) /* Validate the Weak Pointer wraps a non-nullptr pointer to a DataArray<T> object */
   {
@@ -494,7 +497,7 @@ void TesselateFarFieldGrains::dataCheck()
     m_CellPhases = m_CellPhasesPtr.lock()->getPointer(0);
   } /* Now assign the raw pointer to data from the DataArray<T> object */
 
-  std::vector<size_t> tDims(1, 0);
+  QVector<size_t> tDims(1, 0);
   AttributeMatrix::Pointer cellFeatureAttrMat = m->createNonPrereqAttributeMatrix(this, getOutputCellFeatureAttributeMatrixName(), tDims, AttributeMatrix::Type::CellFeature, AttributeMatrixID21);
   if(getErrorCode() < 0)
   {
@@ -754,7 +757,7 @@ void TesselateFarFieldGrains::load_features()
     {
       setErrorCondition(-600, "The number of features is Zero and should be greater than Zero");
     }
-    std::vector<size_t> tDims(1, currentFeature + numFeatures);
+    QVector<size_t> tDims(1, currentFeature + numFeatures);
     cellFeatureAttrMat->setTupleDimensions(tDims);
     updateFeatureInstancePointers();
 

@@ -230,11 +230,11 @@ void KMeans::dataCheck()
   }
   }
 
-  std::vector<size_t> tDims(1, m_InitClusters + 1);
+  QVector<size_t> tDims(1, m_InitClusters + 1);
   m->createNonPrereqAttributeMatrix(this, getFeatureAttributeMatrixName(), tDims, destAttrMatType, AttributeMatrixID21);
 
   DataArrayPath tempPath;
-  std::vector<size_t> cDims;
+  QVector<size_t> cDims;
   QVector<DataArrayPath> dataArrayPaths;
 
   m_InDataPtr = getDataContainerArray()->getPrereqIDataArrayFromPath<IDataArray, AbstractFilter>(this, getSelectedArrayPath());

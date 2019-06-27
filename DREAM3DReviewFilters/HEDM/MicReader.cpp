@@ -37,11 +37,12 @@
 
 #include <algorithm>
 
-#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QObject>
+#include <QtCore/QTextStream>
+#include <QtCore/QtDebug>
 
 #include "EbsdLib/EbsdMacros.h"
 #include "EbsdLib/EbsdMath.h"

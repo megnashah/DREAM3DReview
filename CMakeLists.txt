@@ -34,25 +34,7 @@ include(${SIMPLProj_SOURCE_DIR}/Source/SIMPLib/SIMPLibMacros.cmake)
 
 
 ## YOU MUST INCLUDE THIS FILE TO USE ITK !!!
-# Then do not forget to add "${ITK_LIBRARIES}" to the target_link_libraries below
-# SIMPL Itself has ITK (at least it should if we are doing this) which means by
-# this point ITK is actually found. So let's add some additional Modules that are
-# going to be needed.
-
-if(ITK_VERSION_MAJOR EQUAL 4)
-  # Put ITK 4 Specific Modules in here
-  set_property(GLOBAL PROPERTY ADDITIONAL_ITK_MODULES ""
-  )
-elseif(ITK_VERSION_MAJOR EQUAL 5)
-  # Put ITK 5 Specific Modules in here
-  set_property(GLOBAL PROPERTY ADDITIONAL_ITK_MODULES 	
-                          ITKOptimizersv4
-                          ITKMetricsv4
-                          ITKRegistrationMethodsv4
-                          ITKIOTransformBase
-  )
-endif()
-
+## Then do not forget to add "${ITK_LIBRARIES}" to the target_link_libraries below
 include( ${CMP_SOURCE_DIR}/ITKSupport/IncludeITK.cmake)
 
 # --------------------------------------------------------------------
@@ -315,7 +297,7 @@ if(EXISTS ${${PLUGIN_NAME}_SOURCE_DIR}/Data)
     set(INSTALL_DESTINATION "${DREAM3D_PACKAGE_DEST_PREFIX}")
   endif()
 
-  install(DIRECTORY ${${PLUGIN_NAME}_SOURCE_DIR}/Data
+  install(DIRECTORY ${${PLUGIN_NAME}_SOURCE_DIR}/Data/${PLUGIN_NAME}
           DESTINATION Data
           COMPONENT Applications )
 endif()

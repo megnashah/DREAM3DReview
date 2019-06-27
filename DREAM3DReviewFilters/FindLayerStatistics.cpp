@@ -269,11 +269,11 @@ void FindLayerStatistics::dataCheck()
     numLayers = image->getXPoints();
   }
 
-  std::vector<size_t> tDims(1, numLayers);
+  QVector<size_t> tDims(1, numLayers);
   DataContainer::Pointer m = getDataContainerArray()->getDataContainer(getSelectedArrayPath().getDataContainerName());
   m->createNonPrereqAttributeMatrix(this, getLayerAttributeMatrixName(), tDims, AttributeMatrix::Type::CellFeature);
 
-  std::vector<size_t> cDims(1, 1);
+  QVector<size_t> cDims(1, 1);
   tempPath.update(getSelectedArrayPath().getDataContainerName(), getSelectedArrayPath().getAttributeMatrixName(), getLayerIDsArrayName());
   m_LayerIDsPtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<int32_t>, AbstractFilter, int32_t>(this, tempPath, 0,
                                                                                                                      cDims); /* Assigns the shared_ptr<> to an instance variable that is a weak_ptr<> */

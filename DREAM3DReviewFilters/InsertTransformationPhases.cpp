@@ -40,6 +40,9 @@
 
 #include "InsertTransformationPhases.h"
 
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 
 #include "SIMPLib/Common/Constants.h"
 #include "SIMPLib/FilterParameters/AbstractFilterParametersReader.h"
@@ -384,7 +387,7 @@ void InsertTransformationPhases::dataCheck()
     return;
   }
 
-  std::vector<size_t> dims(1, 1);
+  QVector<size_t> dims(1, 1);
   // Cell Data
   m_FeatureIdsPtr = getDataContainerArray()->getPrereqArrayFromPath<DataArray<int32_t>, AbstractFilter>(this, getFeatureIdsArrayPath(),
                                                                                                         dims); /* Assigns the shared_ptr<> to an instance variable that is a weak_ptr<> */
@@ -554,7 +557,7 @@ void InsertTransformationPhases::execute()
   size_t numensembles = m_PhaseTypesPtr.lock()->getNumberOfTuples();
 
   // resizing statsgen attribute matrix to add new phase info
-  std::vector<size_t> tDims(1, numensembles + 1);
+  QVector<size_t> tDims(1, numensembles + 1);
   statsGenAttrMat->resizeAttributeArrays(tDims);
   updateStatsGenEnsembleInstancePointers();
 
@@ -601,7 +604,7 @@ void InsertTransformationPhases::insertTransformationPhases()
 
   size_t totalFeatures = m_FeaturePhasesPtr.lock()->getNumberOfTuples();
   // int64_t totalPoints = static_cast<size_t>(m_FeatureIdsPtr.lock()->getNumberOfTuples());
-  std::vector<size_t> tDims(1, 1);
+  QVector<size_t> tDims(1, 1);
 
   // find the minimum resolution
   FloatVec3Type spacing = m->getGeometryAs<ImageGeom>()->getSpacing();

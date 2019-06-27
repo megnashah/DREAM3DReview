@@ -146,7 +146,7 @@ void Silhouette::dataCheck()
   clearWarningCode();
 
   QVector<DataArrayPath> dataArrayPaths;
-  std::vector<size_t> cDims(1, 1);
+  QVector<size_t> cDims(1, 1);
 
   m_SilhouetteArrayPtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<double>, AbstractFilter>(this, getSilhouetteArrayPath(), 0, cDims, "", DataArrayID31);
   if(m_SilhouetteArrayPtr.lock())

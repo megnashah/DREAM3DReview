@@ -187,13 +187,13 @@ void PrincipalComponentAnalysis::dataCheck()
     return;
   }
 
-  std::vector<size_t> tDims(1, paths.size());
+  QVector<size_t> tDims(1, paths.size());
 
   DataContainer::Pointer m = getDataContainerArray()->getDataContainer(getSelectedDataArrayPaths()[0].getDataContainerName());
   m->createNonPrereqAttributeMatrix(this, getPCAttributeMatrixName(), tDims, AttributeMatrix::Type::Generic, AttributeMatrixID21);
 
   DataArrayPath tempPath;
-  std::vector<size_t> cDims(1, 1);
+  QVector<size_t> cDims(1, 1);
 
   tempPath.update(getSelectedDataArrayPaths()[0].getDataContainerName(), getPCAttributeMatrixName(), getPCEigenvaluesName());
   m_PCEigenvaluesPtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<double>, AbstractFilter, double>(this, tempPath, 0, cDims, "", DataArrayID31);

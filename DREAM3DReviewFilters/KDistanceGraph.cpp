@@ -139,7 +139,7 @@ void KDistanceGraph::dataCheck()
     return;
   }
 
-  std::vector<size_t> cDims(1, 1);
+  QVector<size_t> cDims(1, 1);
   QVector<DataArrayPath> dataArrayPaths;
 
   m_InDataPtr = getDataContainerArray()->getPrereqIDataArrayFromPath<IDataArray, AbstractFilter>(this, getSelectedArrayPath());

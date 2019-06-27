@@ -43,6 +43,7 @@
 #include "hdf5.h"
 
 #include <QtCore/QString>
+#include <QtCore/QVector>
 
 #include "EbsdLib/EbsdImporter.h"
 #include "EbsdLib/EbsdLib.h"
