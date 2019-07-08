@@ -117,6 +117,12 @@ public:
 		SIMPL_FILTER_PARAMETER(float, LearningRate)
 		Q_PROPERTY(float LearningRate READ getLearningRate WRITE setLearningRate)
 
+    SIMPL_FILTER_PARAMETER(float, ReqFracOverlapPxlsRigid)
+    Q_PROPERTY(float ReqFracOverlapPxlsRigid READ getReqFracOverlapPxlsRigid WRITE setReqFracOverlapPxlsRigid)
+
+    SIMPL_FILTER_PARAMETER(float, ReqFracOverlapPxlsAffine)
+    Q_PROPERTY(float ReqFracOverlapPxlsAffine READ getReqFracOverlapPxlsAffine WRITE setReqFracOverlapPxlsAffine)
+
 
 
 

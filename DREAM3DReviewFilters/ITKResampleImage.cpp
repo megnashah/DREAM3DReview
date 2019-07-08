@@ -576,9 +576,7 @@ template <typename T> void ITKResampleImage::Resample2D(QString sliceNo)
 	if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 1)
 	{
 		using PixelType = itk::Vector<T, 1>;
-
-
-		//RESAMPLE2D_VARIABLECOMPONENT()
+		RESAMPLE2D_VARIABLECOMPONENT(sliceNo)
 	}
 	else if (m_MovingImagePtr.lock()->getComponentDimensions()[0] == 2)
 	{

@@ -162,6 +162,8 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 			<< "BSplineOrder"
       << "InitializeRigidWithFFT"
       << "InitializeAffineWithFFT"
+      << "ReqFracOverlapPxlsRigid"
+      << "ReqFracOverlapPxlsAffine"
       ;
 		parameter->setLinkedProperties(linkedProps);
 		parameter->setEditable(false);
@@ -230,6 +232,8 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 	parameters.push_back(SIMPL_NEW_OUTPUT_FILE_FP("Output Transform File", TransformFile, FilterParameter::Parameter, ITKPairwiseImageRegistration));
   parameters.push_back(SIMPL_NEW_BOOL_FP("Initialize Translation With FFT", InitializeRigidWithFFT, FilterParameter::Parameter, ITKPairwiseImageRegistration, 1));
   parameters.push_back(SIMPL_NEW_BOOL_FP("Initialize Translation With FFT", InitializeAffineWithFFT, FilterParameter::Parameter, ITKPairwiseImageRegistration, 2));
+  parameters.push_back(SIMPL_NEW_FLOAT_FP("Required Fraction of Overlapping Pixels for FFT", ReqFracOverlapPxlsRigid, FilterParameter::Parameter, ITKPairwiseImageRegistration, 1));
+  parameters.push_back(SIMPL_NEW_FLOAT_FP("Required Fraction of Overlapping Pixels for FFT", ReqFracOverlapPxlsAffine, FilterParameter::Parameter, ITKPairwiseImageRegistration, 2));
 
 
 
@@ -405,6 +409,12 @@ void ITKPairwiseImageRegistration::dataCheck()
       setErrorCondition(-5557, ss);
     }
 
+    if (m_InitializeRigidWithFFT && (m_ReqFracOverlapPxlsRigid > 1 || m_ReqFracOverlapPxlsRigid < 0))
+    {
+      QString ss = QObject::tr("The pixel fraction overlap must be between 0 and 1");
+      setErrorCondition(-5559, ss);
+    }
+
   }
 
   if (m_TransformType == 2)
@@ -413,6 +423,12 @@ void ITKPairwiseImageRegistration::dataCheck()
     {
       QString ss = QObject::tr("The spacing must be the same for fixed and moving to initialize with FFT");
       setErrorCondition(-5558, ss);
+    }
+
+    if (m_InitializeAffineWithFFT && (m_ReqFracOverlapPxlsAffine > 1 || m_ReqFracOverlapPxlsAffine < 0))
+    {
+      QString ss = QObject::tr("The pixel fraction overlap must be between 0 and 1");
+      setErrorCondition(-5559, ss);
     }
 
   }
@@ -618,6 +634,7 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 	registration->InPlaceOn();
 	registration->SetFixedImage(itkFixedImage);
 	registration->SetMovingImage(itkMovingImage);
+  
 
 	//////////////////////////////// TRANSFORM //////////////////////////////////////////////////
 
@@ -659,7 +676,8 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
       FFTNXcorrType::Pointer fftfilter = FFTNXcorrType::New();
       fftfilter->SetFixedImage(itkFixedImage);
       fftfilter->SetMovingImage(itkMovingImage);
-      fftfilter->SetRequiredFractionOfOverlappingPixels(0.5);
+      fftfilter->SetRequiredFractionOfOverlappingPixels(m_ReqFracOverlapPxlsRigid);
+      //fftfilter->SetRequiredNumberOfOverlappingPixels(600000);
       fftfilter->Update();
 
       using MinimumMaximumImageCalculatorType = itk::MinimumMaximumImageCalculator<FloatImageType>;
@@ -667,11 +685,11 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
       minimumMaximumImageCalculatorFilter->SetImage(fftfilter->GetOutput());
       minimumMaximumImageCalculatorFilter->Compute();
       itk::Index<2> maximumCorrelationPatchCenter = minimumMaximumImageCalculatorFilter->GetIndexOfMaximum();
-      itk::Size<2> outputSize = fftfilter->GetOutput()->GetLargestPossibleRegion().GetSize();
+      itk::Size<2> movingSize = itkMovingImage->GetLargestPossibleRegion().GetSize();
 
       itk::Index<2> maximumCorrelationPatchCenterFixed;
-      maximumCorrelationPatchCenterFixed[0] = outputSize[0] / 2 - maximumCorrelationPatchCenter[0];
-      maximumCorrelationPatchCenterFixed[1] = outputSize[1] / 2 - maximumCorrelationPatchCenter[1];
+      maximumCorrelationPatchCenterFixed[0] = movingSize[0] - maximumCorrelationPatchCenter[0];
+      maximumCorrelationPatchCenterFixed[1] = movingSize[1] - maximumCorrelationPatchCenter[1];
       TransformType::InputVectorType translation; 
 
       translation[0] = maximumCorrelationPatchCenterFixed[0];
@@ -685,8 +703,8 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 		transformInitializer->GeometryOn();
 		transformInitializer->SetFixedImage(itkFixedImage);
 		transformInitializer->SetMovingImage(itkMovingImage);
-		transformInitializer->GeometryOn(); 
-		transformInitializer->InitializeTransform();
+		//transformInitializer->GeometryOn(); 
+		//transformInitializer->InitializeTransform();
 
 		registration->SetInitialTransform(transform);
 
@@ -706,7 +724,7 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
       FFTNXcorrType::Pointer fftfilter = FFTNXcorrType::New();
       fftfilter->SetFixedImage(itkFixedImage);
       fftfilter->SetMovingImage(itkMovingImage);
-      fftfilter->SetRequiredFractionOfOverlappingPixels(0.5);
+      fftfilter->SetRequiredFractionOfOverlappingPixels(m_ReqFracOverlapPxlsAffine);
       fftfilter->Update();
 
       using MinimumMaximumImageCalculatorType = itk::MinimumMaximumImageCalculator<FloatImageType>;
