@@ -1,34 +1,39 @@
-#ifndef _ebsdwriterfactory_h
-#define _ebsdwriterfactory_h
 
+
+#pragma once
+
+#include <cstdint>
 #include <map>
-#include <cmath>
-#include <fstream>
 
-#include <QtCore/QDateTime>
+#include <QtCore/QString>
 
-#include "SIMPLib/DataArrays/DataArray.hpp"
-#include "SIMPLib/DataArrays/StringDataArray.h"
-
+#include "SIMPLib/DataArrays/IDataArray.h"
 
 class EBSDWriterFactory
 {
 public:
   virtual ~EBSDWriterFactory();
+
   EBSDWriterFactory(const EBSDWriterFactory&) = delete;
   EBSDWriterFactory& operator=(const EBSDWriterFactory&) = delete;
 
   static EBSDWriterFactory* Instance();
-  std::function<QString(QString, IDataArray::Pointer, uint64_t)> EBSDWriterFactory::getWriter(QString name);
+
+  /**
+   * @brief getWriter
+   * @param name
+   * @return
+   */
+  std::function<QString(QString, const IDataArray::Pointer&, uint64_t)> getWriter(const QString& name);
 
 private:
-	EBSDWriterFactory();
+  EBSDWriterFactory();
 
+  /**
+   * @brief initializeDataTypes
+   */
   void initializeDataTypes();
 
-
   static EBSDWriterFactory* self;
-  std::map<QString, std::function<QString(QString, IDataArray::Pointer, uint64_t)>> m_DataTypes;
+  std::map<QString, std::function<QString(QString, const IDataArray::Pointer&, uint64_t)>> m_DataTypes;
 };
-
-#endif
