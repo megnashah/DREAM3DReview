@@ -46,6 +46,8 @@
 #include "H5Support/H5ScopedSentinel.h"
 #include "SIMPLib/FilterParameters/FloatVec3FilterParameter.h"
 #include "SIMPLib/FilterParameters/LinkedBooleanFilterParameter.h"
+#include "SIMPLib/FilterParameters/SeparatorFilterParameter.h"
+
 
 
 
@@ -78,6 +80,8 @@ ITKPairwiseImageRegistration::ITKPairwiseImageRegistration()
   , m_FixedSpacing(1.0, 1.0, 1.0)
   , m_ChangeOriginResolution(false)
   , m_Optimizer(0)
+  , m_ReqFracOverlapPxlsAffine(0.5)
+  , m_ReqFracOverlapPxlsRigid(0.5)
   , m_InitializeAffineWithFFT(true)
   , m_InitializeRigidWithFFT(true)
 {
@@ -237,11 +241,12 @@ void ITKPairwiseImageRegistration::setupFilterParameters()
 
 
 
-
+  parameters.push_back(SeparatorFilterParameter::New("Fixed Image List", FilterParameter::Parameter));
 	parameters.push_back(SIMPL_NEW_FILELISTINFO_FP("Fixed Image File List", FixedFileListInfo, FilterParameter::Parameter, ITKPairwiseImageRegistration));
 	FileListInfoFilterParameter::Pointer fixedFileList = std::dynamic_pointer_cast<FileListInfoFilterParameter>(parameters.back());
 	fixedFileList->setGroupIndex(1);
 
+  parameters.push_back(SeparatorFilterParameter::New("Moving Image List", FilterParameter::Parameter));
 	parameters.push_back(SIMPL_NEW_FILELISTINFO_FP("Moving Image File List", MovingFileListInfo, FilterParameter::Parameter, ITKPairwiseImageRegistration));
 	FileListInfoFilterParameter::Pointer movingFileList =   std::dynamic_pointer_cast<FileListInfoFilterParameter>(parameters.back());
 	movingFileList->setGroupIndex(1);
@@ -593,6 +598,10 @@ void ITKPairwiseImageRegistration::registerImagePair2D(DataContainerArray::Point
 	ImageType::Pointer itkMovingImage = movingtoITK->GetOutput();
 
 	//////////////////////////////// SETUP ORIGIN _ RESOLUTION //////////////////////////////////////////////////
+
+  //if the user selects the origin and resolution to be different for the moving and fixed image, then they must enter in the specific values. 
+  //if the user says the origin and resolution are the same for the moving and fixed, just set the origin to (0,0) and resolution (1.0, 1.0) for both
+
 
   if (!m_ChangeOriginResolution)
   {

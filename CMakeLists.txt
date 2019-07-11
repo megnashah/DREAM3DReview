@@ -41,7 +41,11 @@ include(${SIMPLProj_SOURCE_DIR}/Source/SIMPLib/SIMPLibMacros.cmake)
 
 if(ITK_VERSION_MAJOR EQUAL 4)
   # Put ITK 4 Specific Modules in here
-  set_property(GLOBAL PROPERTY ADDITIONAL_ITK_MODULES ""
+  set_property(GLOBAL PROPERTY ADDITIONAL_ITK_MODULES 	
+  ITKOptimizersv4
+  ITKMetricsv4
+  ITKRegistrationMethodsv4
+  ITKIOTransformBase
   )
 elseif(ITK_VERSION_MAJOR EQUAL 5)
   # Put ITK 5 Specific Modules in here
