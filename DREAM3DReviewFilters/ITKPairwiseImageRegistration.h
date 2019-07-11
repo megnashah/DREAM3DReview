@@ -39,7 +39,7 @@ class DREAM3DReview_EXPORT ITKPairwiseImageRegistration : public AbstractFilter
 public:
   SIMPL_SHARED_POINTERS(ITKPairwiseImageRegistration)
   SIMPL_FILTER_NEW_MACRO(ITKPairwiseImageRegistration)
-  SIMPL_TYPE_MACRO_SUPER(ITKPairwiseImageRegistration, AbstractFilter)
+  SIMPL_TYPE_MACRO_SUPER_OVERRIDE(ITKPairwiseImageRegistration, AbstractFilter)
 
   ~ITKPairwiseImageRegistration() override;
 

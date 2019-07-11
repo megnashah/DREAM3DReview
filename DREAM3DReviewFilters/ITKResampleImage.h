@@ -41,7 +41,7 @@ class DREAM3DReview_EXPORT ITKResampleImage : public AbstractFilter
 public:
   SIMPL_SHARED_POINTERS(ITKResampleImage)
   SIMPL_FILTER_NEW_MACRO(ITKResampleImage)
-  SIMPL_TYPE_MACRO_SUPER(ITKResampleImage, AbstractFilter)
+  SIMPL_TYPE_MACRO_SUPER_OVERRIDE(ITKResampleImage, AbstractFilter)
 
   ~ITKResampleImage() override;
 
