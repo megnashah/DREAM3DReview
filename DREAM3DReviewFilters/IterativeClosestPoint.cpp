@@ -9,8 +9,10 @@
 #include "SIMPLib/FilterParameters/BooleanFilterParameter.h"
 #include "SIMPLib/FilterParameters/DataContainerSelectionFilterParameter.h"
 #include "SIMPLib/FilterParameters/IntFilterParameter.h"
+#include "SIMPLib/FilterParameters/LinkedBooleanFilterParameter.h"
 #include "SIMPLib/FilterParameters/StringFilterParameter.h"
 #include "SIMPLib/Geometry/VertexGeom.h"
+
 
 #include "DREAM3DReview/DREAM3DReviewConstants.h"
 #include "DREAM3DReview/DREAM3DReviewVersion.h"
@@ -64,7 +66,9 @@ struct VertexGeomAdaptor
 enum createdPathID : RenameDataPath::DataID_t
 {
   AttributeMatrixID20 = 20,
+  AttributeMatrixID19 = 19,
   ArrayID21 = 21,
+  ArrayID22 = 22,
 };
 
 // -----------------------------------------------------------------------------
@@ -103,6 +107,15 @@ void IterativeClosestPoint::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_BOOL_FP("Apply Transform to Moving Geometry", ApplyTransform, FilterParameter::Category::Parameter, IterativeClosestPoint));
   parameters.push_back(SIMPL_NEW_STRING_FP("Transform Attribute Matrix Name", TransformAttributeMatrixName, FilterParameter::Category::CreatedArray, IterativeClosestPoint));
   parameters.push_back(SIMPL_NEW_STRING_FP("Transform Array Name", TransformArrayName, FilterParameter::Category::CreatedArray, IterativeClosestPoint));
+  QStringList linkedProps;
+  linkedProps << "SummedDistanceAttributeMatrixName"
+    << "SummedDistanceArrayName";
+  parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Save Summed Distance", SaveSummedDistance, FilterParameter::Category::Parameter, IterativeClosestPoint, linkedProps));
+  parameters.push_back(SIMPL_NEW_STRING_FP("Summed Distance Attribute Matrix Name", SummedDistanceAttributeMatrixName, FilterParameter::Category::CreatedArray, IterativeClosestPoint));
+  parameters.push_back(SIMPL_NEW_STRING_FP("Summed Distance Array Name", SummedDistanceArrayName, FilterParameter::Category::CreatedArray, IterativeClosestPoint));
+
+
+
   setFilterParameters(parameters);
 }
 
@@ -138,6 +151,31 @@ void IterativeClosestPoint::dataCheck()
   }
 
   am->createNonPrereqArray<DataArray<float>>(this, getTransformArrayName(), 0, {4, 4}, ArrayID21);
+
+  if (m_SaveSummedDistance)
+  {
+
+
+    if (getErrorCode() < 0)
+    {
+      return;
+    }
+    std::vector<size_t> tDims(1, m_Iterations);
+    AttributeMatrix::Pointer am2 = dc->createNonPrereqAttributeMatrix(this, DataArrayPath(m_MovingVertexGeometry.getDataContainerName(), getSummedDistanceAttributeMatrixName(), ""), tDims,
+      AttributeMatrix::Type::Generic, AttributeMatrixID19);
+
+    if (getErrorCode() < 0)
+    {
+      return;
+    }
+
+    am2->createNonPrereqArray<DataArray<float>>(this, getSummedDistanceArrayName(), 0, {1}, ArrayID22);
+
+
+  }
+
+
+
 }
 
 // -----------------------------------------------------------------------------
@@ -150,6 +188,12 @@ void IterativeClosestPoint::execute()
   if(getErrorCode() < 0)
   {
     return;
+  }
+
+  m_SummedDistPtr = getDataContainerArray()->getPrereqArrayFromPath<DataArray<float>>(this, DataArrayPath(m_MovingVertexGeometry.getDataContainerName(), getSummedDistanceAttributeMatrixName(), getSummedDistanceArrayName()), { 1 });
+  if (m_SummedDistPtr.lock())
+  {
+    m_SummedDist = m_SummedDistPtr.lock()->getPointer(0);
   }
 
   VertexGeom::Pointer moving = getDataContainerArray()->getDataContainer(m_MovingVertexGeometry.getDataContainerName())->getGeometryAs<VertexGeom>();
@@ -196,6 +240,7 @@ void IterativeClosestPoint::execute()
       return;
     }
 
+    float sum_dist = 0;
     for(size_t j = 0; j < numMovingVerts; j++)
     {
       size_t id;
@@ -206,7 +251,13 @@ void IterativeClosestPoint::execute()
       dynTargetPtr[3 * j + 0] = targetPtr[3 * id + 0];
       dynTargetPtr[3 * j + 1] = targetPtr[3 * id + 1];
       dynTargetPtr[3 * j + 2] = targetPtr[3 * id + 2];
+      sum_dist = dist + sum_dist;
     }
+
+    m_SummedDist[i] = sum_dist;
+
+
+
 
     Eigen::Map<PointCloud> moving_(movingCopyPtr, 3, numMovingVerts);
     Eigen::Map<PointCloud> target_(dynTargetPtr, 3, numMovingVerts);
@@ -455,4 +506,52 @@ void IterativeClosestPoint::setTransformArrayName(const QString& value)
 QString IterativeClosestPoint::getTransformArrayName() const
 {
   return m_TransformArrayName;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void IterativeClosestPoint::setSaveSummedDistance(const bool& value)
+{
+  m_SaveSummedDistance = value;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+bool IterativeClosestPoint::getSaveSummedDistance() const
+{
+  return m_SaveSummedDistance;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void IterativeClosestPoint::setSummedDistanceAttributeMatrixName(const QString& value)
+{
+  m_SummedDistanceAttributeMatrixName = value;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QString IterativeClosestPoint::getSummedDistanceAttributeMatrixName() const
+{
+  return m_SummedDistanceAttributeMatrixName;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void IterativeClosestPoint::setSummedDistanceArrayName(const QString& value)
+{
+  m_SummedDistanceArrayName = value;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QString IterativeClosestPoint::getSummedDistanceArrayName() const
+{
+  return m_SummedDistanceArrayName;
 }

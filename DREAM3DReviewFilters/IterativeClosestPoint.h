@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "SIMPLib/DataArrays/DataArray.hpp"
 #include "SIMPLib/SIMPLib.h"
 #include "SIMPLib/Filtering/AbstractFilter.h"
 
@@ -36,6 +37,9 @@ class DREAM3DReview_EXPORT IterativeClosestPoint : public AbstractFilter
   PYB11_PROPERTY(bool ApplyTransform READ getApplyTransform WRITE setApplyTransform)
   PYB11_PROPERTY(QString TransformAttributeMatrixName READ getTransformAttributeMatrixName WRITE setTransformAttributeMatrixName)
   PYB11_PROPERTY(QString TransformArrayName READ getTransformArrayName WRITE setTransformArrayName)
+  PYB11_PROPERTY(bool SaveSummedDistance READ getSaveSummedDistance WRITE setSaveSummedDistance)
+  PYB11_PROPERTY(QString SummedDistanceAttributeMatrixName READ getSummedDistanceAttributeMatrixName WRITE setSummedDistanceAttributeMatrixName)
+  PYB11_PROPERTY(QString SummedDistanceArrayName READ getSummedDistanceArrayName WRITE setSummedDistanceArrayName)
 
   PYB11_END_BINDINGS()
 
@@ -133,6 +137,45 @@ public:
   Q_PROPERTY(QString TransformArrayName READ getTransformArrayName WRITE setTransformArrayName)
 
   /**
+   * @brief Setter property for SaveSummedDistance
+   */
+    void setSaveSummedDistance(const bool& value);
+
+  /**
+   * @brief Getter property for SaveSummedDistance
+   * @return Value of SaveSummedDistance
+   */
+  bool getSaveSummedDistance() const;
+  Q_PROPERTY(bool SaveSummedDistance READ getSaveSummedDistance WRITE setSaveSummedDistance)
+
+    /**
+     * @brief Setter property for SummedDistanceAttributeMatrixName
+     */
+    void setSummedDistanceAttributeMatrixName(const QString& value);
+
+  /**
+   * @brief Getter property for SummedDistanceAttributeMatrixName
+   * @return Value of SummedDistanceAttributeMatrixName
+   */
+  QString getSummedDistanceAttributeMatrixName() const;
+  Q_PROPERTY(QString SummedDistanceAttributeMatrixName READ getSummedDistanceAttributeMatrixName WRITE setSummedDistanceAttributeMatrixName)
+
+    /**
+     * @brief Setter property for SummedDistanceArrayName
+     */
+    void setSummedDistanceArrayName(const QString& value);
+
+  /**
+   * @brief Getter property for SummedDistanceArrayName
+   * @return Value of SummedDistanceArrayName
+   */
+  QString getSummedDistanceArrayName() const;
+  Q_PROPERTY(QString SummedDistanceArrayName READ getSummedDistanceArrayName WRITE setSummedDistanceArrayName)
+
+
+
+
+  /**
    * @brief getCompiledLibraryName Reimplemented from @see AbstractFilter class
    */
   QString getCompiledLibraryName() const override;
@@ -207,6 +250,12 @@ private:
   bool m_ApplyTransform = {false};
   QString m_TransformAttributeMatrixName = {"TransformAttributeMatrix"};
   QString m_TransformArrayName = {"Transform"};
+  bool m_SaveSummedDistance = { false };
+  QString m_SummedDistanceAttributeMatrixName = { "SummedDistanceAttributeMatrix" };
+  QString m_SummedDistanceArrayName = { "SummedDistance" };
+
+  std::weak_ptr<DataArray<float>> m_SummedDistPtr;
+  float* m_SummedDist = nullptr;
 
 public:
   IterativeClosestPoint(const IterativeClosestPoint&) = delete;            // Copy Constructor Not Implemented
