@@ -55,7 +55,7 @@ class DREAM3DReview_EXPORT PrincipalComponentAnalysis : public AbstractFilter
   PYB11_FILTER()
   PYB11_SHARED_POINTERS(PrincipalComponentAnalysis)
   PYB11_FILTER_NEW_MACRO(PrincipalComponentAnalysis)
-  PYB11_PROPERTY(QVector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
+  PYB11_PROPERTY(std::vector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
   PYB11_PROPERTY(QString PCAttributeMatrixName READ getPCAttributeMatrixName WRITE setPCAttributeMatrixName)
   PYB11_PROPERTY(QString PCEigenvaluesName READ getPCEigenvaluesName WRITE setPCEigenvaluesName)
   PYB11_PROPERTY(QString PCEigenvectorsName READ getPCEigenvectorsName WRITE setPCEigenvectorsName)
@@ -90,13 +90,13 @@ public:
   /**
    * @brief Setter property for SelectedDataArrayPaths
    */
-  void setSelectedDataArrayPaths(const QVector<DataArrayPath>& value);
+  void setSelectedDataArrayPaths(const std::vector<DataArrayPath>& value);
   /**
    * @brief Getter property for SelectedDataArrayPaths
    * @return Value of SelectedDataArrayPaths
    */
-  QVector<DataArrayPath> getSelectedDataArrayPaths() const;
-  Q_PROPERTY(QVector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
+  std::vector<DataArrayPath> getSelectedDataArrayPaths() const;
+  Q_PROPERTY(DataArrayPathVec SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
 
   /**
    * @brief Setter property for PCAttributeMatrixName
@@ -226,11 +226,6 @@ public:
   void setupFilterParameters() override;
 
   /**
-   * @brief readFilterParameters Reimplemented from @see AbstractFilter class
-   */
-  void readFilterParameters(AbstractFilterParametersReader* reader, int index) override;
-
-  /**
    * @brief execute Reimplemented from @see AbstractFilter class
    */
   void execute() override;
@@ -256,7 +251,7 @@ private:
   std::weak_ptr<DataArray<double>> m_ProjectedDataSpacePtr;
   double* m_ProjectedDataSpace = nullptr;
 
-  QVector<DataArrayPath> m_SelectedDataArrayPaths = {QVector<DataArrayPath>()};
+  std::vector<DataArrayPath> m_SelectedDataArrayPaths = {};
   QString m_PCAttributeMatrixName = {"PrincipalComponentAnalysis"};
   QString m_PCEigenvaluesName = {"PrincipalComponentEigenvalues"};
   QString m_PCEigenvectorsName = {"PrincipalComponentEigenvectors"};

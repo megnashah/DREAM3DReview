@@ -77,14 +77,14 @@ SteinerCompact::~SteinerCompact() = default;
 void SteinerCompact::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  QStringList linkedProps;
+  std::vector<QString> linkedProps;
   {
     LinkedChoicesFilterParameter::Pointer parameter = LinkedChoicesFilterParameter::New();
     parameter->setHumanLabel("Section Plane");
     parameter->setPropertyName("Plane");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(SteinerCompact, this, Plane));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(SteinerCompact, this, Plane));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("XY");
     choices.push_back("XZ");
     choices.push_back("YZ");
@@ -99,7 +99,7 @@ void SteinerCompact::setupFilterParameters()
     parameter->setPropertyName("Sites");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(SteinerCompact, this, Sites));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(SteinerCompact, this, Sites));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("8");
     choices.push_back("12");
     choices.push_back("16");
@@ -112,11 +112,11 @@ void SteinerCompact::setupFilterParameters()
   }
   // parameters.push_back(SIMPL_NEW_INTEGER_FP("Number Of Sites", Sites, FilterParameter::Category::Parameter, SteinerCompact));
   linkedProps.clear();
-  linkedProps << "VtkFileName";
+  linkedProps.push_back("VtkFileName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Graphical Output As .vtk", VtkOutput, FilterParameter::Category::Parameter, SteinerCompact, linkedProps));
   parameters.push_back(SIMPL_NEW_OUTPUT_FILE_FP("Output Vtk File", VtkFileName, FilterParameter::Category::Parameter, SteinerCompact, "*.vtk", "VTK Polydata"));
   linkedProps.clear();
-  linkedProps << "TxtFileName";
+  linkedProps.push_back("TxtFileName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Text Output As .txt", TxtOutput, FilterParameter::Category::Parameter, SteinerCompact, linkedProps));
   parameters.push_back(SIMPL_NEW_OUTPUT_FILE_FP("Output Text File", TxtFileName, FilterParameter::Category::Parameter, SteinerCompact, "*.txt", "Text"));
   parameters.push_back(SeparatorFilterParameter::Create("Cell Data", FilterParameter::Category::RequiredArray));

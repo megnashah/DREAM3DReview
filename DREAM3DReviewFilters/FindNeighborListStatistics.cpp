@@ -1,7 +1,7 @@
 /* ============================================================================
  * Software developed by US federal government employees (including military personnel)
  * as part of their official duties is not subject to copyright protection and is
- * considered “public domain” (see 17 USC Section 105). Public domain software can be used
+ * considered "public domain" (see 17 USC Section 105). Public domain software can be used
  * by anyone for any purpose, and cannot be released under a copyright license
  * (including typical open source software licenses).
  *
@@ -50,28 +50,28 @@ FindNeighborListStatistics::~FindNeighborListStatistics() = default;
 void FindNeighborListStatistics::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  QStringList linkedProps;
+  std::vector<QString> linkedProps;
 
   linkedProps.clear();
-  linkedProps << "LengthArrayName";
+  linkedProps.push_back("LengthArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Length", FindLength, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MinimumArrayName";
+  linkedProps.push_back("MinimumArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Minimum", FindMin, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MaximumArrayName";
+  linkedProps.push_back("MaximumArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Maximum", FindMax, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MeanArrayName";
+  linkedProps.push_back("MeanArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Mean", FindMean, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MedianArrayName";
+  linkedProps.push_back("MedianArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Median", FindMedian, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "StdDeviationArrayName";
+  linkedProps.push_back("StdDeviationArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Standard Deviation", FindStdDeviation, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "SummationArrayName";
+  linkedProps.push_back("SummationArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Summation", FindSummation, FilterParameter::Category::Parameter, FindNeighborListStatistics, linkedProps));
   linkedProps.clear();
 

@@ -155,7 +155,7 @@ void FindLayerStatistics::setupFilterParameters()
     parameter->setSetterCallback(SIMPL_BIND_SETTER(FindLayerStatistics, this, Plane));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(FindLayerStatistics, this, Plane));
 
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("XY");
     choices.push_back("XZ");
     choices.push_back("YZ");

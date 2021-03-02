@@ -86,12 +86,12 @@ void FindArrayStatistics::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
   parameters.push_back(SeparatorFilterParameter::Create("Statistics Options", FilterParameter::Category::Parameter));
-  QStringList linkedProps;
-  linkedProps << "HistogramArrayName"
-              << "UseFullRange"
-              << "NumBins"
-              << "MinRange"
-              << "MaxRange";
+  std::vector<QString> linkedProps;
+  linkedProps.push_back("HistogramArrayName");
+  linkedProps.push_back("UseFullRange");
+  linkedProps.push_back("NumBins");
+  linkedProps.push_back("MinRange");
+  linkedProps.push_back("MaxRange");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Histogram", FindHistogram, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Histogram Min Value", MinRange, FilterParameter::Category::Parameter, FindArrayStatistics));
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Histogram Max Value", MaxRange, FilterParameter::Category::Parameter, FindArrayStatistics));
@@ -99,36 +99,36 @@ void FindArrayStatistics::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Number of Bins", NumBins, FilterParameter::Category::Parameter, FindArrayStatistics));
 
   linkedProps.clear();
-  linkedProps << "LengthArrayName";
+  linkedProps.push_back("LengthArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Length", FindLength, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MinimumArrayName";
+  linkedProps.push_back("MinimumArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Minimum", FindMin, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MaximumArrayName";
+  linkedProps.push_back("MaximumArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Maximum", FindMax, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MeanArrayName";
+  linkedProps.push_back("MeanArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Mean", FindMean, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "MedianArrayName";
+  linkedProps.push_back("MedianArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Median", FindMedian, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "StdDeviationArrayName";
+  linkedProps.push_back("StdDeviationArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Standard Deviation", FindStdDeviation, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "SummationArrayName";
+  linkedProps.push_back("SummationArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Find Summation", FindSummation, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
 
   parameters.push_back(SeparatorFilterParameter::Create("Algorithm Options", FilterParameter::Category::Parameter));
-  linkedProps << "MaskArrayPath";
+  linkedProps.push_back("MaskArrayPath");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "FeatureIdsArrayPath";
+  linkedProps.push_back("FeatureIdsArrayPath");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Compute Statistics Per Feature/Ensemble", ComputeByIndex, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
   linkedProps.clear();
-  linkedProps << "StandardizedArrayName";
+  linkedProps.push_back("StandardizedArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Standardize Data", StandardizeData, FilterParameter::Category::Parameter, FindArrayStatistics, linkedProps));
 
   DataArraySelectionFilterParameter::RequirementType dasReq = DataArraySelectionFilterParameter::CreateRequirement(SIMPL::Defaults::AnyPrimitive, 1, AttributeMatrix::Type::Any, IGeometry::Type::Any);

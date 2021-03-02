@@ -132,7 +132,7 @@ void DelaunayTriangulation::setupFilterParameters()
   FilterParameterVectorType parameters;
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Offset", Offset, FilterParameter::Category::Parameter, DelaunayTriangulation));
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Tolerance", Tolerance, FilterParameter::Category::Parameter, DelaunayTriangulation));
-  QStringList linkedProps = {"FeatureIdsArrayPath"};
+  std::vector<QString> linkedProps = {"FeatureIdsArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Triangulate by Feature", TriangulateByFeature, FilterParameter::Category::Parameter, DelaunayTriangulation, linkedProps));
   DataContainerSelectionFilterParameter::RequirementType dcReq;
   IGeometry::Types geomTypes = {IGeometry::Type::Vertex, IGeometry::Type::Edge, IGeometry::Type::Triangle, IGeometry::Type::Quad, IGeometry::Type::Tetrahedral};

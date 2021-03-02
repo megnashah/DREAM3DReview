@@ -53,17 +53,17 @@ InterpolatePointCloudToRegularGrid::~InterpolatePointCloudToRegularGrid() = defa
 void InterpolatePointCloudToRegularGrid::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  QStringList linkedProps("MaskArrayPath");
+  std::vector<QString> linkedProps = {"MaskArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, InterpolatePointCloudToRegularGrid, linkedProps));
   linkedProps.clear();
-  linkedProps << "KernelDistancesArrayName";
+  linkedProps.push_back("KernelDistancesArrayName");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Store Kernel Distances", StoreKernelDistances, FilterParameter::Category::Parameter, InterpolatePointCloudToRegularGrid, linkedProps));
   {
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Uniform");
     choices.push_back("Gaussian");
-    QStringList linkedProps;
-    linkedProps << "Sigmas";
+    std::vector<QString> linkedProps;
+    linkedProps.push_back("Sigmas");
     LinkedChoicesFilterParameter::Pointer parameter = LinkedChoicesFilterParameter::New();
     parameter->setHumanLabel("Interpolation Technique");
     parameter->setPropertyName("InterpolationTechnique");
@@ -209,8 +209,8 @@ void InterpolatePointCloudToRegularGrid::dataCheck()
   // Create the attribute matrix where all the interpolated data will be stored
   interpolatedDC->createNonPrereqAttributeMatrix(this, getInterpolatedAttributeMatrixName(), tDims, AttributeMatrix::Type::Cell);
 
-  QVector<DataArrayPath> interpolatePaths = getArraysToInterpolate();
-  QVector<DataArrayPath> copyPaths = getArraysToCopy();
+  std::vector<DataArrayPath> interpolatePaths = getArraysToInterpolate();
+  std::vector<DataArrayPath> copyPaths = getArraysToCopy();
 
   if(!DataArrayPath::ValidateVector(interpolatePaths) || !DataArrayPath::ValidateVector(copyPaths))
   {
@@ -220,7 +220,7 @@ void InterpolatePointCloudToRegularGrid::dataCheck()
 
   DataArrayPath path(getDataContainerName().getDataContainerName(), "", "");
 
-  if(!interpolatePaths.isEmpty())
+  if(!interpolatePaths.empty())
   {
     if(!interpolatePaths[0].hasSameDataContainer(path))
     {
@@ -229,7 +229,7 @@ void InterpolatePointCloudToRegularGrid::dataCheck()
     }
   }
 
-  if(!copyPaths.isEmpty())
+  if(!copyPaths.empty())
   {
     if(!copyPaths[0].hasSameDataContainer(path))
     {
@@ -238,7 +238,7 @@ void InterpolatePointCloudToRegularGrid::dataCheck()
     }
   }
 
-  if(!interpolatePaths.isEmpty() && !copyPaths.isEmpty())
+  if(!interpolatePaths.empty() && !copyPaths.empty())
   {
     if(!interpolatePaths[0].hasSameAttributeMatrixPath(copyPaths[0]))
     {
@@ -254,12 +254,12 @@ void InterpolatePointCloudToRegularGrid::dataCheck()
 
   QString attrMatName;
 
-  if(attrMatName.isEmpty() && !interpolatePaths.isEmpty())
+  if(attrMatName.isEmpty() && !interpolatePaths.empty())
   {
     attrMatName = interpolatePaths[0].getAttributeMatrixName();
   }
 
-  if(attrMatName.isEmpty() && !copyPaths.isEmpty())
+  if(attrMatName.isEmpty() && !copyPaths.empty())
   {
     attrMatName = copyPaths[0].getAttributeMatrixName();
   }
@@ -732,25 +732,25 @@ DataArrayPath InterpolatePointCloudToRegularGrid::getDataContainerName() const
 }
 
 // -----------------------------------------------------------------------------
-void InterpolatePointCloudToRegularGrid::setArraysToInterpolate(const QVector<DataArrayPath>& value)
+void InterpolatePointCloudToRegularGrid::setArraysToInterpolate(const std::vector<DataArrayPath>& value)
 {
   m_ArraysToInterpolate = value;
 }
 
 // -----------------------------------------------------------------------------
-QVector<DataArrayPath> InterpolatePointCloudToRegularGrid::getArraysToInterpolate() const
+std::vector<DataArrayPath> InterpolatePointCloudToRegularGrid::getArraysToInterpolate() const
 {
   return m_ArraysToInterpolate;
 }
 
 // -----------------------------------------------------------------------------
-void InterpolatePointCloudToRegularGrid::setArraysToCopy(const QVector<DataArrayPath>& value)
+void InterpolatePointCloudToRegularGrid::setArraysToCopy(const std::vector<DataArrayPath>& value)
 {
   m_ArraysToCopy = value;
 }
 
 // -----------------------------------------------------------------------------
-QVector<DataArrayPath> InterpolatePointCloudToRegularGrid::getArraysToCopy() const
+std::vector<DataArrayPath> InterpolatePointCloudToRegularGrid::getArraysToCopy() const
 {
   return m_ArraysToCopy;
 }

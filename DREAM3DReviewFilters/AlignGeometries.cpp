@@ -66,7 +66,7 @@ void AlignGeometries::setupFilterParameters()
     ChoiceFilterParameter::Pointer parameter = ChoiceFilterParameter::New();
     parameter->setHumanLabel("Alignment Type");
     parameter->setPropertyName("AlignmentType");
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Origin");
     choices.push_back("Centroid");
     parameter->setChoices(choices);

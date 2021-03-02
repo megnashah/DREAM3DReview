@@ -58,12 +58,12 @@ void DownsampleVertexGeometry::setupFilterParameters()
     parameter->setPropertyName("DownsampleType");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(DownsampleVertexGeometry, this, DownsampleType));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(DownsampleVertexGeometry, this, DownsampleType));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Remove Every Nth Point");
     choices.push_back("Remove a Fixed Random Fraction of Points");
     choices.push_back("Downsample the Geometry on a Grid");
     parameter->setChoices(choices);
-    QStringList linkedProps = {"DecimationFreq", "DecimationFraction", "GridResolution"};
+    std::vector<QString> linkedProps = {"DecimationFreq", "DecimationFraction", "GridResolution"};
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);

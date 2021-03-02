@@ -155,7 +155,7 @@ void ApplyTransformationToGeometry::setupFilterParameters()
     parameter->setPropertyName("TransformationMatrixType");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(ApplyTransformationToGeometry, this, TransformationMatrixType));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(ApplyTransformationToGeometry, this, TransformationMatrixType));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("No Transformation");
     choices.push_back("Pre-Computed Transformation Matrix");
     choices.push_back("Manual Transformation Matrix");
@@ -163,7 +163,7 @@ void ApplyTransformationToGeometry::setupFilterParameters()
     choices.push_back("Translation");
     choices.push_back("Scale");
     parameter->setChoices(choices);
-    QStringList linkedProps = {"ComputedTransformationMatrix", "ManualTransformationMatrix", "RotationAngle", "RotationAxis", "Translation", "Scale"};
+    std::vector<QString> linkedProps = {"ComputedTransformationMatrix", "ManualTransformationMatrix", "RotationAngle", "RotationAxis", "Translation", "Scale"};
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);

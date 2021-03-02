@@ -74,7 +74,7 @@ AdaptiveAlignment::~AdaptiveAlignment() = default;
 void AdaptiveAlignment::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  QStringList linkedProps("AlignmentShiftFileName");
+  std::vector<QString> linkedProps = {"AlignmentShiftFileName"};
 
   //  parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Write Alignment Shift File", WriteAlignmentShifts, FilterParameter::Category::Parameter, AdaptiveAlignment, linkedProps));
   //  parameters.push_back(SIMPL_NEW_OUTPUT_FILE_FP("Alignment File", AlignmentShiftFileName, FilterParameter::Category::Parameter, AdaptiveAlignment, "", "*.txt"));
@@ -88,16 +88,16 @@ void AdaptiveAlignment::setupFilterParameters()
 
     parameter->setDefaultValue(0);
 
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("None");
     choices.push_back("SEM Images");
     choices.push_back("Own Shifts");
 
     parameter->setChoices(choices);
-    QStringList linkedProps;
-    linkedProps << "ImageDataArrayPath"
-                << "ShiftX"
-                << "ShiftY";
+    std::vector<QString> linkedProps;
+    linkedProps.push_back("ImageDataArrayPath");
+    linkedProps.push_back("ShiftX");
+    linkedProps.push_back("ShiftY");
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);
@@ -1094,13 +1094,13 @@ int AdaptiveAlignment::getNumberCircles() const
 }
 
 // -----------------------------------------------------------------------------
-void AdaptiveAlignment::setIgnoredDataArrayPaths(const QVector<DataArrayPath>& value)
+void AdaptiveAlignment::setIgnoredDataArrayPaths(const std::vector<DataArrayPath>& value)
 {
   m_IgnoredDataArrayPaths = value;
 }
 
 // -----------------------------------------------------------------------------
-QVector<DataArrayPath> AdaptiveAlignment::getIgnoredDataArrayPaths() const
+std::vector<DataArrayPath> AdaptiveAlignment::getIgnoredDataArrayPaths() const
 {
   return m_IgnoredDataArrayPaths;
 }

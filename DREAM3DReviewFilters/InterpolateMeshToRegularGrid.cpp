@@ -1,7 +1,7 @@
 /* ============================================================================
  * Software developed by US federal government employees (including military personnel)
  * as part of their official duties is not subject to copyright protection and is
- * considered “public domain” (see 17 USC Section 105). Public domain software can be used
+ * considered "public domain" (see 17 USC Section 105). Public domain software can be used
  * by anyone for any purpose, and cannot be released under a copyright license
  * (including typical open source software licenses).
  *
@@ -54,13 +54,13 @@ void InterpolateMeshToRegularGrid::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
   {
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Specify Dimensions");
     choices.push_back("Automatically Scale");
-    QStringList linkedProps;
-    linkedProps << "SetXDimension"
-                << "SetYDimension"
-                << "ScaleFactorNumCells";
+    std::vector<QString> linkedProps;
+    linkedProps.push_back("SetXDimension");
+    linkedProps.push_back("SetYDimension");
+    linkedProps.push_back("ScaleFactorNumCells");
     LinkedChoicesFilterParameter::Pointer parameter = LinkedChoicesFilterParameter::New();
     parameter->setHumanLabel("Grid Generation Method");
     parameter->setPropertyName("ScaleOrSpecifyNumCells");

@@ -86,12 +86,12 @@ void KMeans::setupFilterParameters()
     parameter->setPropertyName("DistanceMetric");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(KMeans, this, DistanceMetric));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(KMeans, this, DistanceMetric));
-    QVector<QString> choices = {"Euclidean", "Squared Euclidean"};
+    std::vector<QString> choices = {"Euclidean", "Squared Euclidean"};
     parameter->setChoices(choices);
     parameter->setCategory(FilterParameter::Category::Parameter);
     parameters.push_back(parameter);
   }
-  QStringList linkedProps("MaskArrayPath");
+  std::vector<QString> linkedProps = {"MaskArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, KMeans, linkedProps));
   DataArraySelectionFilterParameter::RequirementType dasReq =
       DataArraySelectionFilterParameter::CreateRequirement(SIMPL::Defaults::AnyPrimitive, SIMPL::Defaults::AnyComponentSize, AttributeMatrix::Type::Any, IGeometry::Type::Any);

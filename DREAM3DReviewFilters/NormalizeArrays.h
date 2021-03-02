@@ -55,7 +55,7 @@ class DREAM3DReview_EXPORT NormalizeArrays : public AbstractFilter
   PYB11_FILTER()
   PYB11_SHARED_POINTERS(NormalizeArrays)
   PYB11_FILTER_NEW_MACRO(NormalizeArrays)
-  PYB11_PROPERTY(QVector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
+  PYB11_PROPERTY(std::vector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
   PYB11_PROPERTY(int NormalizeType READ getNormalizeType WRITE setNormalizeType)
   PYB11_PROPERTY(double RangeMin READ getRangeMin WRITE setRangeMin)
   PYB11_PROPERTY(double RangeMax READ getRangeMax WRITE setRangeMax)
@@ -90,13 +90,13 @@ public:
   /**
    * @brief Setter property for SelectedDataArrayPaths
    */
-  void setSelectedDataArrayPaths(const QVector<DataArrayPath>& value);
+  void setSelectedDataArrayPaths(const std::vector<DataArrayPath>& value);
   /**
    * @brief Getter property for SelectedDataArrayPaths
    * @return Value of SelectedDataArrayPaths
    */
-  QVector<DataArrayPath> getSelectedDataArrayPaths() const;
-  Q_PROPERTY(QVector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
+  std::vector<DataArrayPath> getSelectedDataArrayPaths() const;
+  Q_PROPERTY(DataArrayPathVec SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
 
   /**
    * @brief Setter property for NormalizeType
@@ -226,11 +226,6 @@ public:
   void setupFilterParameters() override;
 
   /**
-   * @brief readFilterParameters Reimplemented from @see AbstractFilter class
-   */
-  void readFilterParameters(AbstractFilterParametersReader* reader, int index) override;
-
-  /**
    * @brief execute Reimplemented from @see AbstractFilter class
    */
   void execute() override;
@@ -254,7 +249,7 @@ private:
   std::weak_ptr<DataArray<bool>> m_MaskPtr;
   bool* m_Mask = nullptr;
 
-  QVector<DataArrayPath> m_SelectedDataArrayPaths = {QVector<DataArrayPath>()};
+  std::vector<DataArrayPath> m_SelectedDataArrayPaths = {};
   int m_NormalizeType = {0};
   double m_RangeMin = {0.0};
   double m_RangeMax = {1.0};

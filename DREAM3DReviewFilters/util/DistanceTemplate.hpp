@@ -58,22 +58,16 @@ public:
   // -----------------------------------------------------------------------------
   //
   // -----------------------------------------------------------------------------
-  static QVector<QString> GetDistanceMetricsOptions()
+  static std::vector<QString> GetDistanceMetricsOptions()
   {
-    QVector<QString> distMetricOptions;
+    std::vector<QString> distMetricOptions;
 
-    QString distMetric1 = "Euclidean";
-    distMetricOptions.push_back(distMetric1);
-    QString distMetric2 = "Squared Euclidean";
-    distMetricOptions.push_back(distMetric2);
-    QString distMetric3 = "Manhattan";
-    distMetricOptions.push_back(distMetric3);
-    QString distMetric4 = "Cosine";
-    distMetricOptions.push_back(distMetric4);
-    QString distMetric5 = "Pearson";
-    distMetricOptions.push_back(distMetric5);
-    QString distMetric6 = "Squared Pearson";
-    distMetricOptions.push_back(distMetric6);
+    distMetricOptions.push_back("Euclidean");
+    distMetricOptions.push_back("Squared Euclidean");
+    distMetricOptions.push_back("Manhattan");
+    distMetricOptions.push_back("Cosine");
+    distMetricOptions.push_back("Pearson");
+    distMetricOptions.push_back("Squared Pearson");
 
     return distMetricOptions;
   }

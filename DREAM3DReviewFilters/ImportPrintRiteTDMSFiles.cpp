@@ -111,7 +111,7 @@ void ImportPrintRiteTDMSFiles::setupFilterParameters()
     parameter->setPropertyName("LaserOnArrayOption");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(ImportPrintRiteTDMSFiles, this, LaserOnArrayOption));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(ImportPrintRiteTDMSFiles, this, LaserOnArrayOption));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Laser Drive");
     choices.push_back("On-Axis Photodiode");
     parameter->setChoices(choices);
@@ -121,12 +121,12 @@ void ImportPrintRiteTDMSFiles::setupFilterParameters()
   }
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Laser On Threshold", LaserOnThreshold, FilterParameter::Category::Parameter, ImportPrintRiteTDMSFiles));
   parameters.push_back(SIMPL_NEW_BOOL_FP("Downcast Raw Data", DowncastRawData, FilterParameter::Category::Parameter, ImportPrintRiteTDMSFiles));
-  QStringList linkedProps = {"PowerScalingCoefficients"};
+  std::vector<QString> linkedProps = {"PowerScalingCoefficients"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Scale Laser Power", ScaleLaserPower, FilterParameter::Category::Parameter, ImportPrintRiteTDMSFiles, linkedProps));
   parameters.push_back(SIMPL_NEW_FLOAT_VEC2_FP("Power Scaling Coefficients", PowerScalingCoefficients, FilterParameter::Category::Parameter, ImportPrintRiteTDMSFiles));
 
   linkedProps.clear();
-  linkedProps << "TemperatureScalingCoefficients";
+  linkedProps.push_back("TemperatureScalingCoefficients");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Scale Pyrometer Tempeature", ScalePyrometerTemperature, FilterParameter::Category::Parameter, ImportPrintRiteTDMSFiles, linkedProps));
   parameters.push_back(SIMPL_NEW_FLOAT_VEC2_FP("Temperature Scaling Coefficients", TemperatureScalingCoefficients, FilterParameter::Category::Parameter, ImportPrintRiteTDMSFiles));
   parameters.push_back(SeparatorFilterParameter::Create("Spatial Parameters", FilterParameter::Category::Parameter));
@@ -136,12 +136,12 @@ void ImportPrintRiteTDMSFiles::setupFilterParameters()
     parameter->setPropertyName("SpatialTransformOption");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(ImportPrintRiteTDMSFiles, this, SpatialTransformOption));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(ImportPrintRiteTDMSFiles, this, SpatialTransformOption));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Do Not Compute Real Space Transformation");
     choices.push_back("Compute Real Space Transformation");
     choices.push_back("Import Spatial Transformation Coefficients From File");
     parameter->setChoices(choices);
-    QStringList linkedProps = {"LayerForScaling", "SearchRadius", "SplitRegions1", "SplitRegions2", "STLFilePath1", "STLFilePath2", "InputSpatialTransformFilePath"};
+    std::vector<QString> linkedProps = {"LayerForScaling", "SearchRadius", "SplitRegions1", "SplitRegions2", "STLFilePath1", "STLFilePath2", "InputSpatialTransformFilePath"};
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);

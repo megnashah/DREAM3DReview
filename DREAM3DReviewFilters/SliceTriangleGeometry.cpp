@@ -58,13 +58,13 @@ void SliceTriangleGeometry::setupFilterParameters()
 
   parameters.push_back(SIMPL_NEW_FLOAT_VEC3_FP("Slice Direction (ijk)", SliceDirection, FilterParameter::Category::Parameter, SliceTriangleGeometry));
   {
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Full Range");
     choices.push_back("User Defined Range");
 
-    QStringList linkedChoiceProps;
-    linkedChoiceProps << "Zstart"
-                      << "Zend";
+    std::vector<QString> linkedChoiceProps;
+    linkedChoiceProps.push_back("Zstart");
+    linkedChoiceProps.push_back("Zend");
 
     LinkedChoicesFilterParameter::Pointer parameter = LinkedChoicesFilterParameter::New();
     parameter->setHumanLabel("Slice Range");
@@ -81,7 +81,7 @@ void SliceTriangleGeometry::setupFilterParameters()
 
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Slice Spacing", SliceResolution, FilterParameter::Category::Parameter, SliceTriangleGeometry));
 
-  QStringList linkedProps("RegionIdArrayPath");
+  std::vector<QString> linkedProps = {"RegionIdArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Have Region Ids", HaveRegionIds, FilterParameter::Category::Parameter, SliceTriangleGeometry, linkedProps));
   linkedProps.clear();
   DataContainerSelectionFilterParameter::RequirementType dcsReq;

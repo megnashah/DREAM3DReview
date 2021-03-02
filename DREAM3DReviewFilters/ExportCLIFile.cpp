@@ -69,7 +69,7 @@ void ExportCLIFile::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Precision (places after decimal)", Precision, FilterParameter::Category::Parameter, ExportCLIFile));
   parameters.push_back(SIMPL_NEW_OUTPUT_PATH_FP("Output File Directory", OutputDirectory, FilterParameter::Category::Parameter, ExportCLIFile));
   parameters.push_back(SIMPL_NEW_STRING_FP("Output File Prefix", OutputFilePrefix, FilterParameter::Category::Parameter, ExportCLIFile));
-  QStringList linkedProps = {"GroupIdsArrayPath"};
+  std::vector<QString> linkedProps = {"GroupIdsArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Split CLI Files by Group", SplitByGroup, FilterParameter::Category::Parameter, ExportCLIFile, linkedProps));
   DataContainerSelectionFilterParameter::RequirementType dcsReq;
   IGeometry::Types geomTypes = {IGeometry::Type::Edge};

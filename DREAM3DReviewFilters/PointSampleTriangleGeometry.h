@@ -67,7 +67,7 @@ class DREAM3DReview_EXPORT PointSampleTriangleGeometry : public AbstractFilter
   PYB11_PROPERTY(DataArrayPath TriangleAreasArrayPath READ getTriangleAreasArrayPath WRITE setTriangleAreasArrayPath)
   PYB11_PROPERTY(bool UseMask READ getUseMask WRITE setUseMask)
   PYB11_PROPERTY(DataArrayPath MaskArrayPath READ getMaskArrayPath WRITE setMaskArrayPath)
-  PYB11_PROPERTY(QVector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
+  PYB11_PROPERTY(std::vector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
   PYB11_END_BINDINGS()
   // End Python bindings declarations
 
@@ -194,13 +194,13 @@ public:
   /**
    * @brief Setter property for SelectedDataArrayPaths
    */
-  void setSelectedDataArrayPaths(const QVector<DataArrayPath>& value);
+  void setSelectedDataArrayPaths(const std::vector<DataArrayPath>& value);
   /**
    * @brief Getter property for SelectedDataArrayPaths
    * @return Value of SelectedDataArrayPaths
    */
-  QVector<DataArrayPath> getSelectedDataArrayPaths() const;
-  Q_PROPERTY(QVector<DataArrayPath> SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
+  std::vector<DataArrayPath> getSelectedDataArrayPaths() const;
+  Q_PROPERTY(DataArrayPathVec SelectedDataArrayPaths READ getSelectedDataArrayPaths WRITE setSelectedDataArrayPaths)
 
   /**
    * @brief getCompiledLibraryName Reimplemented from @see AbstractFilter class
@@ -292,7 +292,7 @@ private:
   DataArrayPath m_TriangleAreasArrayPath = {SIMPL::Defaults::TriangleDataContainerName, SIMPL::Defaults::FaceAttributeMatrixName, SIMPL::FaceData::SurfaceMeshFaceAreas};
   bool m_UseMask = {false};
   DataArrayPath m_MaskArrayPath = {"", "", ""};
-  QVector<DataArrayPath> m_SelectedDataArrayPaths = {QVector<DataArrayPath>()};
+  std::vector<DataArrayPath> m_SelectedDataArrayPaths = {};
 
   std::vector<IDataArray::WeakPointer> m_SelectedWeakPtrVector;
   std::vector<IDataArray::WeakPointer> m_CreatedWeakPtrVector;

@@ -377,7 +377,7 @@ void PottsModel::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Iterations", Iterations, FilterParameter::Category::Parameter, PottsModel));
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Temperature", Temperature, FilterParameter::Category::Parameter, PottsModel));
   parameters.push_back(SIMPL_NEW_BOOL_FP("Periodic Boundaries", PeriodicBoundaries, FilterParameter::Category::Parameter, PottsModel));
-  QStringList linkedProps = {"MaskArrayPath"};
+  std::vector<QString> linkedProps = {"MaskArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, PottsModel, linkedProps));
   parameters.push_back(SeparatorFilterParameter::Create("Cell Data", FilterParameter::Category::RequiredArray));
   DataArraySelectionFilterParameter::RequirementType dasReq = DataArraySelectionFilterParameter::CreateRequirement(SIMPL::TypeNames::Int32, 1, AttributeMatrix::Type::Cell, IGeometry::Type::Image);

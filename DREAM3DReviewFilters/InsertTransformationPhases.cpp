@@ -117,7 +117,7 @@ void InsertTransformationPhases::setupFilterParameters()
     option->setGetterCallback(SIMPL_BIND_GETTER(InsertTransformationPhases, this, TransCrystalStruct));
     // The choices here are IN ORDER of the enumerations from the EBSDLib. DO NOT CHANGE THE ORDER.
     std::vector<std::string> names = LaueOps::GetLaueNames();
-    QVector<QString> choices;
+    std::vector<QString> choices;
     for(const auto& name : names)
     {
       choices.push_back(QString::fromStdString(name));
@@ -129,13 +129,13 @@ void InsertTransformationPhases::setupFilterParameters()
     parameters.push_back(option);
   }
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Transformation Phase Misorientation", TransformationPhaseMisorientation, FilterParameter::Category::Parameter, InsertTransformationPhases));
-  QStringList linkedProps1;
-  linkedProps1 << "TransformationPhaseHabitPlane"
-               << "UseAllVariants";
+  std::vector<QString> linkedProps1;
+  linkedProps1.push_back("TransformationPhaseHabitPlane");
+  linkedProps1.push_back("UseAllVariants");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Define Habit Plane", DefineHabitPlane, FilterParameter::Category::Parameter, InsertTransformationPhases, linkedProps1));
   parameters.push_back(SIMPL_NEW_FLOAT_VEC3_FP("Transformation Phase Habit Plane", TransformationPhaseHabitPlane, FilterParameter::Category::Parameter, InsertTransformationPhases));
 
-  QStringList linkedProps2("CoherentFrac");
+  std::vector<QString> linkedProps2 = {"CoherentFrac"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use All Variants", UseAllVariants, FilterParameter::Category::Parameter, InsertTransformationPhases, linkedProps2));
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Coherent Fraction", CoherentFrac, FilterParameter::Category::Parameter, InsertTransformationPhases));
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Transformation Phase Thickness", TransformationPhaseThickness, FilterParameter::Category::Parameter, InsertTransformationPhases));

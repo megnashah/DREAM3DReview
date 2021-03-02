@@ -37,8 +37,8 @@ class DREAM3DReview_EXPORT InterpolatePointCloudToRegularGrid : public AbstractF
   PYB11_SHARED_POINTERS(InterpolatePointCloudToRegularGrid)
   PYB11_FILTER_NEW_MACRO(InterpolatePointCloudToRegularGrid)
   PYB11_PROPERTY(DataArrayPath DataContainerName READ getDataContainerName WRITE setDataContainerName)
-  PYB11_PROPERTY(QVector<DataArrayPath> ArraysToInterpolate READ getArraysToInterpolate WRITE setArraysToInterpolate)
-  PYB11_PROPERTY(QVector<DataArrayPath> ArraysToCopy READ getArraysToCopy WRITE setArraysToCopy)
+  PYB11_PROPERTY(std::vector<DataArrayPath> ArraysToInterpolate READ getArraysToInterpolate WRITE setArraysToInterpolate)
+  PYB11_PROPERTY(std::vector<DataArrayPath> ArraysToCopy READ getArraysToCopy WRITE setArraysToCopy)
   PYB11_PROPERTY(DataArrayPath VoxelIndicesArrayPath READ getVoxelIndicesArrayPath WRITE setVoxelIndicesArrayPath)
   PYB11_PROPERTY(DataArrayPath InterpolatedDataContainerName READ getInterpolatedDataContainerName WRITE setInterpolatedDataContainerName)
   PYB11_PROPERTY(QString InterpolatedAttributeMatrixName READ getInterpolatedAttributeMatrixName WRITE setInterpolatedAttributeMatrixName)
@@ -88,24 +88,24 @@ public:
   /**
    * @brief Setter property for ArraysToInterpolate
    */
-  void setArraysToInterpolate(const QVector<DataArrayPath>& value);
+  void setArraysToInterpolate(const std::vector<DataArrayPath>& value);
   /**
    * @brief Getter property for ArraysToInterpolate
    * @return Value of ArraysToInterpolate
    */
-  QVector<DataArrayPath> getArraysToInterpolate() const;
-  Q_PROPERTY(QVector<DataArrayPath> ArraysToInterpolate READ getArraysToInterpolate WRITE setArraysToInterpolate)
+  std::vector<DataArrayPath> getArraysToInterpolate() const;
+  Q_PROPERTY(DataArrayPathVec ArraysToInterpolate READ getArraysToInterpolate WRITE setArraysToInterpolate)
 
   /**
    * @brief Setter property for ArraysToCopy
    */
-  void setArraysToCopy(const QVector<DataArrayPath>& value);
+  void setArraysToCopy(const std::vector<DataArrayPath>& value);
   /**
    * @brief Getter property for ArraysToCopy
    * @return Value of ArraysToCopy
    */
-  QVector<DataArrayPath> getArraysToCopy() const;
-  Q_PROPERTY(QVector<DataArrayPath> ArraysToCopy READ getArraysToCopy WRITE setArraysToCopy)
+  std::vector<DataArrayPath> getArraysToCopy() const;
+  Q_PROPERTY(DataArrayPathVec ArraysToCopy READ getArraysToCopy WRITE setArraysToCopy)
 
   /**
    * @brief Setter property for VoxelIndicesArrayPath
@@ -338,8 +338,8 @@ private:
   bool* m_Mask = nullptr;
 
   DataArrayPath m_DataContainerName = {"", "", ""};
-  QVector<DataArrayPath> m_ArraysToInterpolate = {QVector<DataArrayPath>()};
-  QVector<DataArrayPath> m_ArraysToCopy = {QVector<DataArrayPath>()};
+  std::vector<DataArrayPath> m_ArraysToInterpolate = {};
+  std::vector<DataArrayPath> m_ArraysToCopy = {};
   DataArrayPath m_VoxelIndicesArrayPath = {"", "", "VoxelIndices"};
   DataArrayPath m_InterpolatedDataContainerName = {"InterpolatedDataContainer", "", ""};
   QString m_InterpolatedAttributeMatrixName = {"InterpolatedAttributeMatrix"};

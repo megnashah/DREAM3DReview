@@ -42,8 +42,8 @@
 #include "SIMPLib/Filtering/AbstractFilter.h"
 
 #include "DREAM3DReview/DREAM3DReviewConstants.h"
-#include "DREAM3DReview/DREAM3DReviewItkConstants.h"
 #include "DREAM3DReview/DREAM3DReviewDLLExport.h"
+#include "DREAM3DReview/DREAM3DReviewItkConstants.h"
 
 /**
  * @brief The AdaptiveAlignment class. This class serves as a superclass for other classes
@@ -237,13 +237,13 @@ public:
   /**
    * @brief Setter property for IgnoredDataArrayPaths
    */
-  void setIgnoredDataArrayPaths(const QVector<DataArrayPath>& value);
+  void setIgnoredDataArrayPaths(const std::vector<DataArrayPath>& value);
   /**
    * @brief Getter property for IgnoredDataArrayPaths
    * @return Value of IgnoredDataArrayPaths
    */
-  QVector<DataArrayPath> getIgnoredDataArrayPaths() const;
-  Q_PROPERTY(QVector<DataArrayPath> IgnoredDataArrayPaths READ getIgnoredDataArrayPaths WRITE setIgnoredDataArrayPaths)
+  std::vector<DataArrayPath> getIgnoredDataArrayPaths() const;
+  Q_PROPERTY(DataArrayPathVec IgnoredDataArrayPaths READ getIgnoredDataArrayPaths WRITE setIgnoredDataArrayPaths)
 
   /**
    * @brief getCompiledLibraryName Reimplemented from @see AbstractFilter class
@@ -379,7 +379,7 @@ private:
   float m_MinRadius = {0.0f};
   float m_MaxRadius = {0.0f};
   int m_NumberCircles = {0};
-  QVector<DataArrayPath> m_IgnoredDataArrayPaths = {};
+  std::vector<DataArrayPath> m_IgnoredDataArrayPaths = {};
 
   DataArray<DREAM3DReviewConstants::DefaultPixelType>::WeakPointer m_NewCellArrayPtr;
 

@@ -95,12 +95,12 @@ void PrincipalComponentAnalysis::setupFilterParameters()
     choices->setPropertyName("MatrixApproach");
     choices->setSetterCallback(SIMPL_BIND_SETTER(PrincipalComponentAnalysis, this, MatrixApproach));
     choices->setGetterCallback(SIMPL_BIND_GETTER(PrincipalComponentAnalysis, this, MatrixApproach));
-    QVector<QString> approaches = {"Correlation", "Covariance"};
+    std::vector<QString> approaches = {"Correlation", "Covariance"};
     choices->setChoices(approaches);
     choices->setCategory(FilterParameter::Category::Parameter);
     parameters.push_back(choices);
   }
-  QStringList linkedProps = {"NumberOfDimensionsForProjection", "ProjectedDataSpaceArrayPath"};
+  std::vector<QString> linkedProps = {"NumberOfDimensionsForProjection", "ProjectedDataSpaceArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Project Data Space", ProjectDataSpace, FilterParameter::Category::Parameter, PrincipalComponentAnalysis, linkedProps));
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Number of Dimensions for Projection", NumberOfDimensionsForProjection, FilterParameter::Category::Parameter, PrincipalComponentAnalysis));
   DataArrayCreationFilterParameter::RequirementType dacReq = DataArrayCreationFilterParameter::CreateRequirement(AttributeMatrix::Type::Any, IGeometry::Type::Any);
@@ -110,23 +110,6 @@ void PrincipalComponentAnalysis::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_STRING_FP("Principal Component Eigenvalues", PCEigenvaluesName, FilterParameter::Category::CreatedArray, PrincipalComponentAnalysis));
   parameters.push_back(SIMPL_NEW_STRING_FP("Principal Component Eigenvectors", PCEigenvectorsName, FilterParameter::Category::CreatedArray, PrincipalComponentAnalysis));
   setFilterParameters(parameters);
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void PrincipalComponentAnalysis::readFilterParameters(AbstractFilterParametersReader* reader, int index)
-{
-  reader->openFilterGroup(this, index);
-  setSelectedDataArrayPaths(reader->readDataArrayPathVector("SelectedDataArrayPaths", getSelectedDataArrayPaths()));
-  setPCAttributeMatrixName(reader->readString("PCAttributeMatrixName", getPCAttributeMatrixName()));
-  setPCEigenvaluesName(reader->readString("PCEigenvaluesName", getPCEigenvaluesName()));
-  setPCEigenvectorsName(reader->readString("PCEigenvectorsName", getPCEigenvectorsName()));
-  setMatrixApproach(reader->readValue("MatrixApproach", getMatrixApproach()));
-  setProjectDataSpace(reader->readValue("ProjectDataSpace", getProjectDataSpace()));
-  setNumberOfDimensionsForProjection(reader->readValue("NumberOfDimensionsForProjection", getNumberOfDimensionsForProjection()));
-  setProjectedDataSpaceArrayPath(reader->readDataArrayPath("ProjectedDataSpaceArrayPath", getProjectedDataSpaceArrayPath()));
-  reader->closeFilterGroup();
 }
 
 // -----------------------------------------------------------------------------
@@ -153,7 +136,7 @@ void PrincipalComponentAnalysis::dataCheck()
     return;
   }
 
-  QVector<DataArrayPath> paths = getSelectedDataArrayPaths();
+  std::vector<DataArrayPath> paths = getSelectedDataArrayPaths();
 
   if(!DataArrayPath::ValidateVector(paths))
   {
@@ -465,13 +448,13 @@ QString PrincipalComponentAnalysis::ClassName()
 }
 
 // -----------------------------------------------------------------------------
-void PrincipalComponentAnalysis::setSelectedDataArrayPaths(const QVector<DataArrayPath>& value)
+void PrincipalComponentAnalysis::setSelectedDataArrayPaths(const std::vector<DataArrayPath>& value)
 {
   m_SelectedDataArrayPaths = value;
 }
 
 // -----------------------------------------------------------------------------
-QVector<DataArrayPath> PrincipalComponentAnalysis::getSelectedDataArrayPaths() const
+std::vector<DataArrayPath> PrincipalComponentAnalysis::getSelectedDataArrayPaths() const
 {
   return m_SelectedDataArrayPaths;
 }

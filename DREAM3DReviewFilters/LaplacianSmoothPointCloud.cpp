@@ -47,7 +47,7 @@ LaplacianSmoothPointCloud::~LaplacianSmoothPointCloud() = default;
 void LaplacianSmoothPointCloud::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  QStringList linkedProps("MaskArrayPath");
+  std::vector<QString> linkedProps = {"MaskArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, LaplacianSmoothPointCloud, linkedProps));
   linkedProps.clear();
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Number of Iterations", NumIterations, FilterParameter::Category::Parameter, LaplacianSmoothPointCloud));

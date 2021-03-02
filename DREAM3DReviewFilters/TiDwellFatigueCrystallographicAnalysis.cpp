@@ -104,7 +104,7 @@ TiDwellFatigueCrystallographicAnalysis::~TiDwellFatigueCrystallographicAnalysis(
 void TiDwellFatigueCrystallographicAnalysis::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  QStringList linkedProps1("AlphaGlobPhase");
+  std::vector<QString> linkedProps1 = {"AlphaGlobPhase"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Alpha Glob Phase Present", AlphaGlobPhasePresent, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis, linkedProps1));
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Alpha Glob Phase Number", AlphaGlobPhase, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis));
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Microtextured Region Phase Number", MTRPhase, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis));
@@ -114,9 +114,9 @@ void TiDwellFatigueCrystallographicAnalysis::setupFilterParameters()
 
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Subsurface Feature Distance to Consider (Microns)", SubsurfaceDistance, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis));
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Fraction of Features to Consider", ConsiderationFraction, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis));
-  QStringList linkedProps2;
-  linkedProps2 << "InitiatorLowerThreshold"
-               << "InitiatorUpperThreshold";
+  std::vector<QString> linkedProps2;
+  linkedProps2.push_back("InitiatorLowerThreshold");
+  linkedProps2.push_back("InitiatorUpperThreshold");
   parameters.push_back(
       SIMPL_NEW_LINKED_BOOL_FP("Do Not Assume Initiator Presence", DoNotAssumeInitiatorPresence, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis, linkedProps2));
   parameters.push_back(SIMPL_NEW_FLOAT_FP("Initiator Lower Threshold (Degrees)", InitiatorLowerThreshold, FilterParameter::Category::Parameter, TiDwellFatigueCrystallographicAnalysis));

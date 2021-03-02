@@ -62,7 +62,7 @@ void ReadBinaryCTNorthStar::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_AM_WITH_LINKED_DC_FP("Cell Attribute Matrix", CellAttributeMatrixName, DataContainerName, FilterParameter::Category::CreatedArray, ReadBinaryCTNorthStar));
   parameters.push_back(SIMPL_NEW_DA_WITH_LINKED_AM_FP("Density", DensityArrayName, DataContainerName, CellAttributeMatrixName, FilterParameter::Category::CreatedArray, ReadBinaryCTNorthStar));
 
-  QVector<QString> choices = IGeometry::GetAllLengthUnitStrings();
+  std::vector<QString> choices = IGeometry::GetAllLengthUnitStrings();
   parameters.push_back(SIMPL_NEW_CHOICE_FP("Length Unit", LengthUnit, FilterParameter::Category::Parameter, ReadBinaryCTNorthStar, choices, false));
 
   PreflightUpdatedValueFilterParameter::Pointer param = SIMPL_NEW_PREFLIGHTUPDATEDVALUE_FP("Original Volume", VolumeDescription, FilterParameter::Category::Parameter, ReadBinaryCTNorthStar);
@@ -72,7 +72,7 @@ void ReadBinaryCTNorthStar::setupFilterParameters()
   param->setReadOnly(true);
   parameters.push_back(param);
 
-  QStringList linkedProps = {"StartVoxelCoord", "EndVoxelCoord", "ImportedVolumeDescription"};
+  std::vector<QString> linkedProps = {"StartVoxelCoord", "EndVoxelCoord", "ImportedVolumeDescription"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Import Subvolume", ImportSubvolume, FilterParameter::Category::Parameter, ReadBinaryCTNorthStar, linkedProps));
 
   parameters.push_back(SIMPL_NEW_INT_VEC3_FP("Starting XYZ Voxel", StartVoxelCoord, FilterParameter::Category::Parameter, ReadBinaryCTNorthStar));

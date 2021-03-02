@@ -93,19 +93,19 @@ void PointSampleTriangleGeometry::setupFilterParameters()
     parameter->setPropertyName("SamplesNumberType");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(PointSampleTriangleGeometry, this, SamplesNumberType));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(PointSampleTriangleGeometry, this, SamplesNumberType));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Manual");
     choices.push_back("Other Geometry");
     parameter->setChoices(choices);
-    QStringList linkedProps = {"NumberOfSamples", "ParentGeometry"};
+    std::vector<QString> linkedProps = {"NumberOfSamples", "ParentGeometry"};
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);
     parameters.push_back(parameter);
   }
   parameters.push_back(SIMPL_NEW_INTEGER_FP("Number of Sample Points", NumberOfSamples, FilterParameter::Category::Parameter, PointSampleTriangleGeometry, 0));
-  QStringList linkedProps;
-  linkedProps << "MaskArrayPath";
+  std::vector<QString> linkedProps;
+  linkedProps.push_back("MaskArrayPath");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, PointSampleTriangleGeometry, linkedProps));
   DataContainerSelectionFilterParameter::RequirementType dcsReq;
   IGeometry::Types geomTypes = {IGeometry::Type::Triangle};
@@ -274,7 +274,7 @@ void PointSampleTriangleGeometry::dataCheck()
     return;
   }
 
-  QVector<DataArrayPath> paths = getSelectedDataArrayPaths();
+  std::vector<DataArrayPath> paths = getSelectedDataArrayPaths();
 
   if(!DataArrayPath::ValidateVector(paths))
   {
@@ -638,13 +638,13 @@ DataArrayPath PointSampleTriangleGeometry::getMaskArrayPath() const
 }
 
 // -----------------------------------------------------------------------------
-void PointSampleTriangleGeometry::setSelectedDataArrayPaths(const QVector<DataArrayPath>& value)
+void PointSampleTriangleGeometry::setSelectedDataArrayPaths(const std::vector<DataArrayPath>& value)
 {
   m_SelectedDataArrayPaths = value;
 }
 
 // -----------------------------------------------------------------------------
-QVector<DataArrayPath> PointSampleTriangleGeometry::getSelectedDataArrayPaths() const
+std::vector<DataArrayPath> PointSampleTriangleGeometry::getSelectedDataArrayPaths() const
 {
   return m_SelectedDataArrayPaths;
 }

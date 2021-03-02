@@ -85,12 +85,12 @@ void DBSCAN::setupFilterParameters()
     parameter->setPropertyName("DistanceMetric");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(DBSCAN, this, DistanceMetric));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(DBSCAN, this, DistanceMetric));
-    QVector<QString> choices = DistanceTemplate::GetDistanceMetricsOptions();
+    std::vector<QString> choices = DistanceTemplate::GetDistanceMetricsOptions();
     parameter->setChoices(choices);
     parameter->setCategory(FilterParameter::Category::Parameter);
     parameters.push_back(parameter);
   }
-  QStringList linkedProps("MaskArrayPath");
+  std::vector<QString> linkedProps = {"MaskArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, DBSCAN, linkedProps));
   DataArraySelectionFilterParameter::RequirementType dasReq =
       DataArraySelectionFilterParameter::CreateRequirement(SIMPL::Defaults::AnyPrimitive, SIMPL::Defaults::AnyComponentSize, AttributeMatrix::Type::Any, IGeometry::Type::Any);

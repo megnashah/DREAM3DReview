@@ -89,18 +89,18 @@ void NormalizeArrays::setupFilterParameters()
     parameter->setPropertyName("NormalizeType");
     parameter->setSetterCallback(SIMPL_BIND_SETTER(NormalizeArrays, this, NormalizeType));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(NormalizeArrays, this, NormalizeType));
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Rescale to Range");
     choices.push_back("Standardize");
     parameter->setChoices(choices);
-    QStringList linkedProps = {"RangeMin", "RangeMax"};
+    std::vector<QString> linkedProps = {"RangeMin", "RangeMax"};
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);
     parameters.push_back(parameter);
   }
   parameters.push_back(SIMPL_NEW_STRING_FP("Postfix", Postfix, FilterParameter::Category::Parameter, NormalizeArrays));
-  QStringList linkedProps = {"MaskArrayPath", "DefaultValue"};
+  std::vector<QString> linkedProps = {"MaskArrayPath", "DefaultValue"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, NormalizeArrays, linkedProps));
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Default Masked Value", DefaultValue, FilterParameter::Category::Parameter, NormalizeArrays));
   parameters.push_back(SIMPL_NEW_DOUBLE_FP("Range Minimum", RangeMin, FilterParameter::Category::Parameter, NormalizeArrays, 0));
@@ -111,23 +111,6 @@ void NormalizeArrays::setupFilterParameters()
   DataArraySelectionFilterParameter::RequirementType dasReq = DataArraySelectionFilterParameter::CreateRequirement(SIMPL::TypeNames::Bool, 1, AttributeMatrix::Type::Any, IGeometry::Type::Any);
   parameters.push_back(SIMPL_NEW_DA_SELECTION_FP("Mask", MaskArrayPath, FilterParameter::Category::RequiredArray, NormalizeArrays, dasReq));
   setFilterParameters(parameters);
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void NormalizeArrays::readFilterParameters(AbstractFilterParametersReader* reader, int index)
-{
-  reader->openFilterGroup(this, index);
-  setSelectedDataArrayPaths(reader->readDataArrayPathVector("SelectedDataArrayPaths", getSelectedDataArrayPaths()));
-  setNormalizeType(reader->readValue("NormalizeType", getNormalizeType()));
-  setRangeMin(reader->readValue("RangeMin", getRangeMin()));
-  setRangeMax(reader->readValue("RangeMax", getRangeMax()));
-  setPostfix(reader->readString("Postfix", getPostfix()));
-  setUseMask(reader->readValue("UseMask", getUseMask()));
-  setMaskArrayPath(reader->readDataArrayPath("MaskArrayPath", getMaskArrayPath()));
-  setDefaultValue(reader->readValue("DefaultValue", getDefaultValue()));
-  reader->closeFilterGroup();
 }
 
 // -----------------------------------------------------------------------------
@@ -168,7 +151,7 @@ void NormalizeArrays::dataCheck()
     setErrorCondition(-11001, ss);
   }
 
-  QVector<DataArrayPath> paths = getSelectedDataArrayPaths();
+  std::vector<DataArrayPath> paths = getSelectedDataArrayPaths();
 
   if(!DataArrayPath::ValidateVector(paths))
   {
@@ -483,13 +466,13 @@ QString NormalizeArrays::ClassName()
 }
 
 // -----------------------------------------------------------------------------
-void NormalizeArrays::setSelectedDataArrayPaths(const QVector<DataArrayPath>& value)
+void NormalizeArrays::setSelectedDataArrayPaths(const std::vector<DataArrayPath>& value)
 {
   m_SelectedDataArrayPaths = value;
 }
 
 // -----------------------------------------------------------------------------
-QVector<DataArrayPath> NormalizeArrays::getSelectedDataArrayPaths() const
+std::vector<DataArrayPath> NormalizeArrays::getSelectedDataArrayPaths() const
 {
   return m_SelectedDataArrayPaths;
 }

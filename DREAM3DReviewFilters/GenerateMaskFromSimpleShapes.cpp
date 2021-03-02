@@ -63,16 +63,16 @@ void GenerateMaskFromSimpleShapes::setupFilterParameters()
     parameter->setSetterCallback(SIMPL_BIND_SETTER(GenerateMaskFromSimpleShapes, this, MaskShape));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(GenerateMaskFromSimpleShapes, this, MaskShape));
 
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Ellipsoid");
     choices.push_back("Box");
     choices.push_back("Cylinder");
     parameter->setChoices(choices);
-    QStringList linkedProps;
-    linkedProps << "AxesLengthArrayPath"
-                << "BoxDimensionsArrayPath"
-                << "CylinderHeightArrayPath"
-                << "CylinderRadiusArrayPath";
+    std::vector<QString> linkedProps;
+    linkedProps.push_back("AxesLengthArrayPath");
+    linkedProps.push_back("BoxDimensionsArrayPath");
+    linkedProps.push_back("CylinderHeightArrayPath");
+    linkedProps.push_back("CylinderRadiusArrayPath");
     parameter->setLinkedProperties(linkedProps);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);

@@ -67,14 +67,14 @@ void MapPointCloudToRegularGrid::setupFilterParameters()
     parameter->setSetterCallback(SIMPL_BIND_SETTER(MapPointCloudToRegularGrid, this, SamplingGridType));
     parameter->setGetterCallback(SIMPL_BIND_GETTER(MapPointCloudToRegularGrid, this, SamplingGridType));
 
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("Manual");
     choices.push_back("Use Exsting Image Geometry");
     parameter->setChoices(choices);
-    QStringList linkedProps2;
-    linkedProps2 << "GridDimensions"
-                 << "CreatedImageDataContainerName"
-                 << "ImageDataContainerPath";
+    std::vector<QString> linkedProps2;
+    linkedProps2.push_back("GridDimensions");
+    linkedProps2.push_back("CreatedImageDataContainerName");
+    linkedProps2.push_back("ImageDataContainerPath");
     parameter->setLinkedProperties(linkedProps2);
     parameter->setEditable(false);
     parameter->setCategory(FilterParameter::Category::Parameter);
@@ -94,7 +94,7 @@ void MapPointCloudToRegularGrid::setupFilterParameters()
     req.dcGeometryTypes = reqGeom;
     parameters.push_back(SIMPL_NEW_DC_SELECTION_FP("Data Container to Map", DataContainerName, FilterParameter::Category::RequiredArray, MapPointCloudToRegularGrid, req));
   }
-  QStringList linkedProps("MaskArrayPath");
+  std::vector<QString> linkedProps = {"MaskArrayPath"};
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Use Mask", UseMask, FilterParameter::Category::Parameter, MapPointCloudToRegularGrid, linkedProps));
   parameters.push_back(SeparatorFilterParameter::Create("Vertex Data", FilterParameter::Category::RequiredArray));
   {

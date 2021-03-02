@@ -581,13 +581,13 @@ void EstablishFoamMorphology::setupFilterParameters()
   parameters.push_back(SIMPL_NEW_STRING_FP("Triple Junction Euclidean Distances", TJEuclideanDistancesArrayName, FilterParameter::Category::CreatedArray, EstablishFoamMorphology));
   parameters.push_back(SIMPL_NEW_STRING_FP("Grain Boundary Euclidean Distances", GBEuclideanDistancesArrayName, FilterParameter::Category::CreatedArray, EstablishFoamMorphology));
 
-  QStringList linkedProps("CsvOutputFile");
-  linkedProps << "CsvOutputFile";
+  std::vector<QString> linkedProps = {"CsvOutputFile"};
+  linkedProps.push_back("CsvOutputFile");
   parameters.push_back(SIMPL_NEW_LINKED_BOOL_FP("Write Goal Attributes", WriteGoalAttributes, FilterParameter::Category::Parameter, EstablishFoamMorphology, linkedProps));
   parameters.push_back(SIMPL_NEW_OUTPUT_FILE_FP("Goal Attribute CSV File", CsvOutputFile, FilterParameter::Category::Parameter, EstablishFoamMorphology, "*.csv", "Comma Separated Data"));
   linkedProps.clear();
-  linkedProps << "FeatureIdsArrayName"
-              << "InputCellFeatureIdsArrayPath";
+  linkedProps.push_back("FeatureIdsArrayName");
+  linkedProps.push_back("InputCellFeatureIdsArrayPath");
   {
     LinkedChoicesFilterParameter::Pointer parameter = LinkedChoicesFilterParameter::New();
     parameter->setHumanLabel("Already Have Features");
@@ -596,7 +596,7 @@ void EstablishFoamMorphology::setupFilterParameters()
     parameter->setGetterCallback(SIMPL_BIND_GETTER(EstablishFoamMorphology, this, HaveFeatures));
 
     parameter->setDefaultValue(getHaveFeatures()); // Just set the first index
-    QVector<QString> choices;
+    std::vector<QString> choices;
     choices.push_back("No");
     choices.push_back("Yes");
     parameter->setChoices(choices);
